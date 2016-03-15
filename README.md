@@ -3,6 +3,8 @@
 WysiBB is a jQuery visual WYSIWYG editor for BBcode.
 For more information please visit [wysibb.com](http://www.wysibb.com) 
 
+### This branch will be used to convert WysiBB from jQ to ES6/2015
+
 ## Usage
 
 Include the JQuery and WysiBB files
