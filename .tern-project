@@ -1,0 +1,44 @@
+{
+  "ecmaVersion": 5,
+  "plugins": {
+    "guess-types": {
+      
+    },
+    "outline": {
+      
+    },
+    "es_modules": {
+      
+    },
+    "eslint": {
+      
+    },
+    "complete_strings": {
+      
+    },
+    "highlight": {
+      
+    },
+    "doc_comment": {
+      
+    },
+    "node": {
+      
+    },
+    "gulp": {
+      
+    },
+    "browser-extension": {
+      
+    },
+    "jquery-ui1-12": {
+      
+    }
+  },
+  "libs": [
+    "ecma5",
+    "browser",
+    "fetch",
+    "jquery"
+  ]
+}
