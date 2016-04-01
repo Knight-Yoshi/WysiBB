@@ -1,5 +1,5 @@
 {
-  "ecmaVersion": 5,
+  "ecmaVersion": 6,
   "plugins": {
     "guess-types": {
       
@@ -10,9 +10,6 @@
     "es_modules": {
       
     },
-    "eslint": {
-      
-    },
     "complete_strings": {
       
     },
@@ -21,6 +18,9 @@
     },
     "doc_comment": {
       
+    },
+    "eslint": {
+      "configFile": "eslint.json"
     },
     "node": {
       

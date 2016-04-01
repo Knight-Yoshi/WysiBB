@@ -1,0 +1,51 @@
+{
+	"extends": "eslint:recommended",
+	"root": true,
+	"parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+			"blockBindings": true,
+			"forOf": true,
+			"jsx": true
+		}
+    },
+	"rules": {
+		"arrow-parens": [2, "always"],
+		"arrow-spacing": [1, { "before": true, "after": true }],
+		"comma-dangle": [1, "always-multiline"],
+		"eqeqeq": [2, "allow-null"],
+		"quotes": [1, "single"],
+		"no-console": 0,
+		"no-duplicate-case": 2,
+		"no-empty-character-class": 2,
+		"no-extra-parens": 1,
+		"no-extra-semi": 1,
+		"no-invalid-regexp": 2,
+		"no-irregular-whitespace": 2,
+		"no-mixed-spaces-and-tabs": [1, "smart-tabs"],
+		"no-negated-in-lhs": 2,
+		"no-redeclare": 2,
+		"no-sparse-arrays": 2,
+		"no-this-before-super": 2,
+		"no-unused-vars": 1,
+		"no-use-before-define": [2, { "functions": false, "classes": true }],
+		"semi": [2, "always"],
+		"use-isnan": 2
+	},
+	"ecmaFeatures": {
+		"regexYFlag": true,
+		"regexUFlag": true
+	},
+	"env": {
+		"es6": true,
+		"browser": true,
+		"jquery": true
+	},
+	"globals": {
+		"jQuery": false,
+		"chrome": false,
+		"Foundation": false,
+		"Gaiaui": false
+	}
+}
