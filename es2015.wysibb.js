@@ -282,26 +282,26 @@
 			btnlist.push('_systr');
 			
 			for(var idx = 0, len = btnlist.length; idx < len; idx++) {
-				var btn = options.allButtons[btnlist[idx]];
+				var optBtn = options.allButtons[btnlist[idx]];
 				
-				if(!btn) {
+				if(!optBtn) {
 					continue;
 				}
 				
-				btn.en = true;
+				optBtn.en = true;
 				
 				// check for simplebbcode
-				if(btn.simplebbcode && Array.isArray(btn.simplebbcode) && btn.simplebbcode.length === 2) {
-					btn.bbcode = btn.html = `${btn.simplebbcode[0]} {SELTEXT} ${btn.simplebbcode[1]}`;
-					if(btn.transform) delete btn.transform;
-					if(btn.modal) delete btn.modal;
+				if(optBtn.simplebbcode && Array.isArray(optBtn.simplebbcode) && optBtn.simplebbcode.length === 2) {
+					optBtn.bbcode = optBtn.html = `${optBtn.simplebbcode[0]} {SELTEXT} ${optBtn.simplebbcode[1]}`;
+					if(optBtn.transform) delete optBtn.transform;
+					if(optBtn.modal) delete optBtn.modal;
 				}
 				
-				if(btn.type === 'select' ) {
-					var optlist = btn.options;
+				if(optBtn.type === 'select' ) {
+					var optlist = optBtn.options;
 					
-					if(typeof btn.options === 'string') {
-						optlist = btn.options.split(',');
+					if(typeof optBtn.options === 'string') {
+						optlist = optBtn.options.split(',');
 						for(var selopt of optlist) {
 							if(!btnlist.includes(selopt)) {
 								btnlist.push(selopt);
@@ -309,20 +309,20 @@
 						}
 					}
 					
-					if(btn.transform && !btn.skipRules) {
-						var btnTransform = extend({}, btn.transform);
+					if(optBtn.transform && !optBtn.skipRules) {
+						var btnTransform = extend({}, optBtn.transform);
 						
 						
 						for(let btnHtml in btnTransform) {
 							let origHtml = btnHtml;
 							let bbcode = btnTransform[btnHtml];
 							
-							if(!btn.bbSelector) {
-								btn.bbSelector = [];
+							if(!optBtn.bbSelector) {
+								optBtn.bbSelector = [];
 							}
 							
-							if(btn.bbSelector.indexOf(bbcode) === -1) {
-								btn.bbSelector.push(bbcode);
+							if(optBtn.bbSelector.indexOf(bbcode) === -1) {
+								optBtn.bbSelector.push(bbcode);
 							}
 							
 							if(this.options.onlyBBmode === false) {
@@ -349,17 +349,17 @@
 										let htmlStr2 = this.unwrapAttrs(bel.innerHTML);
 										let origBtnHtml = this.unwrapAttrs(btnHtml);
 										
-										btn.transform[htmlStr2] = bbcode;
-										delete btn.transform[origBtnHtml];
+										optBtn.transform[htmlStr2] = bbcode;
+										delete optBtn.transform[origBtnHtml];
 										
 										btnHtml = htmlStr2;
 										origHtml = htmlStr2;
 										
-										if(!btn.excmd) {
-											if(!btn.rootSelector) {
-												btn.rootSelector = [];
+										if(!optBtn.excmd) {
+											if(!optBtn.rootSelector) {
+												optBtn.rootSelector = [];
 											}
-											btn.rootSelector.push(rootSelector);
+											optBtn.rootSelector.push(rootSelector);
 										}
 										
 										// check for rules on this rootSelector
@@ -372,12 +372,25 @@
 											var els = bel.querySelectorAll('*');
 											
 											for(let el of els) {
-												var attrs = el.attributes;
+												var attrs = this.getAttrList(el);
 												
-												for (attr of attrs) {
-													let value = attr.value;
-													// line 753
-												}
+												attrs.forEach(function (item, idx) {
+													let attr = el.attributes[item];
+													
+													if(name.substr(0,1) === '_') {
+														name = name.substr(1);
+													}
+													
+													let replaceStrs = attr.match( /\{\S+?\}/g );
+													
+													if(replaceStrs) {
+														for(let a = 0, len = replaceStrs.length; a < len; a++) {
+															let replaceName = replaceStrs[a].substr(1, replaceStrs[a].length - 2);
+															replaceName = replaceName.replace(this.getValidationRGX(replaceName), '');
+															
+														}
+													}
+												});
 											}
 										}
 									}
@@ -389,9 +402,96 @@
 			} // end btnlist.length loop
 		}
 		
-		_isMobile (a) {
+		_isMobile (str) {
 			return  /android|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|meego.+mobile|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i
-			.test( a );
+			.test( str );
+		}
+		
+		getAttrList (element) {
+			let arr = [];
+			let attrs = element.attributes;
+			
+			for(let idx = 0, len = attrs.length; idx < len; idx++) {
+		    if(attrs[idx].specified) {
+		      arr.push(attrs[idx].name);
+		    }
+		  }
+			
+			return arr;
+		}
+		
+		
+		// TRANSFORM FUNCTIONS
+		filterByNode ( node ) {
+			var tagName = node.tagName.toLowerCase();
+			var filter = tagName;
+			var attrs = this.getAttrList( node );
+			for(let idx = 0, len = attrs.length; idx < len; idx++) {
+				let attr = node.attributes[idx];
+				let name = attr.name;
+				let value = attr.value;
+				
+				if(value && !value.match( /\{.*?\}/ )) {
+					if(name === 'style') {
+						let css = attr.value.split(';');
+						
+						for(let i = 0, l = css.length; i < l; i++) {
+							let cssProp = css[i];
+							if(cssProp && cssProp.length > 0) {
+								filter += `[${name}*="${cssProp.trim()}"]`;
+							}
+						}
+					}
+					else {
+						filter += `[${name}=${value}]`;
+					}
+				}
+				else if (value && name === 'style') {
+					let posOfBrace = value.indexOf('{');
+					let valueSubstr = value.substr(0, posOfBrace);
+					
+					if(valueSubstr && valueSubstr !== '') {
+						value = value.substr(0, posOfBrace);
+						let css = value.split(';');
+						
+						for(let i = 0, l = css.length; i < l; i++) {
+							let cssProp = css[i];
+							if(cssProp && cssProp.length > 0) {
+								filter += `[${name}*="${cssProp}"]`;
+							}
+						}
+					}
+				}
+				else {
+					filter += `[${name}]`;
+				}
+			}
+
+			// TODO: replace jquery below with native JS
+// var idx = $n.parent().children( filter ).index( $n );
+// if ( idx > 0 ) {
+// filter += ":eq(" + $n.index() + ")";
+// }
+			
+			return filter;
+		}
+		
+		relFilterByNode ( node, stop ) {
+			var p = '';
+			for(let attrWrap of this.options.attrWrap) {
+				stop = stop.replace(`[${attrWrap}`, `[_${attrWrap}`);
+			}
+			while ( node && node.tagName !== 'BODY' && !this.selectorMatch(node, stop) ) {
+				p = `${this.filterByNode(node)} ${p}}`;
+				if ( node ) {
+					node = node.parentNode;
+				}
+			}
+			return p;
+		}
+	
+		selectorMatch (el, selector) {
+		  return (el.matches || el.matchesSelector).call(el, selector);
 		}
 	}
 	
