@@ -1,8 +1,5 @@
-/* global WBBLANG:true, CURLANG:true, WBBPRESET: true */
-/*! WysiBB v1.5.1 2014-03-26 
- Author: Vadim Dobroskok
- */
-// 'use strict';
+/* global WBBLANG:true, CURLANG:true, WBBPRESET: true, wbbdebug: true */
+
 if ( typeof WBBLANG === 'undefined' ) {
 	WBBLANG = { };
 }
@@ -80,8 +77,8 @@ WBBLANG[ 'en' ] = CURLANG = {
 	sm8 : 'Pain',
 	sm9 : 'Sick',
 };
-var wbbdebug = true;
-!function ( $ ) {
+
+( function ( $ ) {
 	'use strict';
 	$.wysibb = function ( txtArea, settings ) {
 		$( txtArea ).data( 'wbb', this );
@@ -95,10 +92,10 @@ var wbbdebug = true;
 		this.txtArea = txtArea;
 		this.$txtArea = $( txtArea );
 		var id = this.$txtArea.attr( 'id' ) || this.setUID( this.txtArea );
-
 		this.options = {
 			bbmode : false,
 			onlyBBmode : false,
+			debug : true,
 			themeName : 'default',
 			bodyClass : '',
 			lang : 'en',
@@ -115,143 +112,180 @@ var wbbdebug = true;
 			traceTextarea : true,
 			// direction: "ltr",
 			smileConversion : true,
-			buttons : 'bold,italic,underline,strike,sup,sub,|,img,video,link,|,bullist,numlist,|,fontcolor,fontsize,fontfamily,|,alignleft,aligncenter,alignright,|,quote,code,table,removeFormat',
+
+			// END img upload config
+			buttons : 'bold,italic,underline,strike,sup,sub,|,img,video,link,|,bullist,numlist,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,table,removeFormat',
 			allButtons : {
 				bold : {
 					title : CURLANG.bold,
-					buttonHTML : '<span class="fa fa-bold fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-bold1">\uE018</span>',
 					excmd : 'bold',
+					hotkey : 'ctrl+b',
 					transform : {
-						'<strong>{SELTEXT}</strong>' : '[b]{SELTEXT}[/b]',
-					},
+						'<b>{SELTEXT}</b>' : '[b]{SELTEXT}[/b]',
+						'<strong>{SELTEXT}</strong>' : '[b]{SELTEXT}[/b]'
+					}
 				},
 				italic : {
 					title : CURLANG.italic,
-					buttonHTML : '<span class="fa fa-italic fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-italic1">\uE001</span>',
 					excmd : 'italic',
+					hotkey : 'ctrl+i',
 					transform : {
-						'<span style="font-style: italic;">{SELTEXT}</span>' : '[i]{SELTEXT}[/i]',
-					},
+						'<i>{SELTEXT}</i>' : '[i]{SELTEXT}[/i]',
+						'<em>{SELTEXT}</em>' : '[i]{SELTEXT}[/i]'
+					}
 				},
 				underline : {
-					title : CURLANG.bold,
-					buttonHTML : '<span class="fa fa-underline fa-fw"></span>',
+					title : CURLANG.underline,
+					buttonHTML : '<span class="fonticon ve-tlb-underline1">\uE002</span>',
 					excmd : 'underline',
+					hotkey : 'ctrl+u',
 					transform : {
-						'<span style="text-decoration: underline;">{SELTEXT}</span>' : '[u]{SELTEXT}[/u]',
-					},
+						'<u>{SELTEXT}</u>' : '[u]{SELTEXT}[/u]'
+					}
 				},
 				strike : {
-					title : CURLANG.bold,
-					buttonHTML : '<span class="fa fa-strikethrough fa-fw"></span>',
+					title : CURLANG.strike,
+					buttonHTML : '<span class="fonticon fi-stroke1 ve-tlb-strike1">\uE003</span>',
 					excmd : 'strikeThrough',
 					transform : {
-						'<span style="text-decoration: line-through;">{SELTEXT}</span>' : '[strike]{SELTEXT}[/strike]',
-					},
+						'<strike>{SELTEXT}</strike>' : '[s]{SELTEXT}[/s]',
+						'<s>{SELTEXT}</s>' : '[s]{SELTEXT}[/s]'
+					}
 				},
 				sup : {
 					title : CURLANG.sup,
-					buttonHTML : '<span class="fa fa-superscript fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-sup1">\uE005</span>',
 					excmd : 'superscript',
 					transform : {
-						'<sup>{SELTEXT}</sup>' : '[sup]{SELTEXT}[/sup]',
-					},
+						'<sup>{SELTEXT}</sup>' : '[sup]{SELTEXT}[/sup]'
+					}
 				},
 				sub : {
 					title : CURLANG.sub,
-					buttonHTML : '<span class="fa fa-subscript fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-sub1">\uE004</span>',
 					excmd : 'subscript',
 					transform : {
-						'<sub>{SELTEXT}</sub>' : '[sub]{SELTEXT}[/sub]',
-					},
+						'<sub>{SELTEXT}</sub>' : '[sub]{SELTEXT}[/sub]'
+					}
 				},
 				link : {
 					title : CURLANG.link,
-					buttonHTML : '<span class="fa fa-link fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-link1">\uE007</span>',
+					hotkey : 'ctrl+shift+2',
 					modal : {
 						title : CURLANG.modal_link_title,
 						width : '500px',
 						tabs : [
-								{
-									input : [
-											{
-												param : 'SELTEXT',
-												title : CURLANG.modal_link_text,
-											}, {
-												param : 'URL',
-												title : CURLANG.modal_link_url,
-												validation : '^https?://',
-											},
-									],
-								},
-						],
+							{
+								input : [
+										{
+											param : 'SELTEXT',
+											title : CURLANG.modal_link_text,
+											type : 'div'
+										}, {
+											param : 'URL',
+											title : CURLANG.modal_link_url,
+											validation : '^http(s)?://'
+										}
+								]
+							}
+						]
 					},
 					transform : {
-						'<a href="{URL}" target="_blank">{SELTEXT}</a>' : '[url={URL}]{SELTEXT}[/url]',
-						'<a href="{URL}" target="_blank">{URL}</a>' : '[url]{URL}[/url]',
-					},
+						'<a href="{URL}">{SELTEXT}</a>' : '[url={URL}]{SELTEXT}[/url]',
+						'<a href="{URL}">{URL}</a>' : '[url]{URL}[/url]'
+					}
 				},
 				img : {
 					title : CURLANG.img,
-					buttonHTML : '<span class="fa fa-image fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-img1">\uE006</span>',
+					hotkey : 'ctrl+shift+1',
 					addWrap : true,
 					modal : {
 						title : CURLANG.modal_img_title,
 						width : '600px',
 						tabs : [
-								{
-									title : CURLANG.modal_img_tab1,
-									input : [
-											{
-												param : 'SRC',
-												title : CURLANG.modal_imgsrc_text,
-												// by default we check for an actual image file, not an
-												// image returned by the server from a URL
-												validation : '^http(s)?://.*?\.(jpg|png|gif|jpeg)$',
-											},
-									],
-								},
+							{
+								title : CURLANG.modal_img_tab1,
+								input : [
+									{
+										param : 'SRC',
+										title : CURLANG.modal_imgsrc_text,
+										validation : '^http(s)?://.*?\.(jpg|png|gif|jpeg)$'
+									}
+								]
+							}
 						],
-						onLoad : this.imgLoadModal,
+						onLoad : this.imgLoadModal
 					},
 					transform : {
-						'<img src="{SRC}">' : '[img]{SRC}[/img]',
-						'<img src="{SRC}" width="{WIDTH}" height="{HEIGHT}"/>' : '[img width={WIDTH},height={HEIGHT}]{SRC}[/img]',
-					},
-				},
-				quote : {
-					title : CURLANG.quote,
-					buttonHTML : '<span class="fa fa-quote-right fa-fw"></span>',
-					transform : {
-						'<blockquote>{SELTEXT}</blockquote>' : '[quote]{SELTEXT}[/quote]',
-						'<blockquote>{SELTEXT}<cite>{CITE}</cite></blockquote>' : '[quote={CITE}]{SELTEXT}[/quote]',
-					},
-				},
-				code : {
-					title : CURLANG.code,
-					buttonHTML : '<span class="fa fa-code fa-fw"></span>',
-					onlyClearText : true,
-					transform : {
-						'<code>{SELTEXT}</code>' : '[code]{SELTEXT}[/code]',
-					},
+						'<img src="{SRC}" />' : '[img]{SRC}[/img]',
+						'<img src="{SRC}" width="{WIDTH}" height="{HEIGHT}"/>' : '[img width={WIDTH},height={HEIGHT}]{SRC}[/img]'
+					}
 				},
 				bullist : {
 					title : CURLANG.bullist,
-					buttonHTML : '<span class="fa fa-list-ul fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-list1">\uE009</span>',
 					excmd : 'insertUnorderedList',
 					transform : {
 						'<ul>{SELTEXT}</ul>' : '[list]{SELTEXT}[/list]',
-						'<li>{SELTEXT}</li>' : '[*]{SELTEXT}[/*]',
-					},
+						'<li>{SELTEXT}</li>' : '[*]{SELTEXT}[/*]'
+					}
 				},
 				numlist : {
 					title : CURLANG.numlist,
-					buttonHTML : '<span class="fa fa-list-ol fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-numlist1">\uE00a</span>',
 					excmd : 'insertOrderedList',
 					transform : {
 						'<ol>{SELTEXT}</ol>' : '[list=1]{SELTEXT}[/list]',
-						'<li>{SELTEXT}</li>' : '[*]{SELTEXT}[/*]',
-					},
+						'<li>{SELTEXT}</li>' : '[*]{SELTEXT}[/*]'
+					}
+				},
+				quote : {
+					title : CURLANG.quote,
+					buttonHTML : '<span class="fonticon ve-tlb-quote1">\uE00c</span>',
+					hotkey : 'ctrl+shift+3',
+					// subInsert: true,
+					transform : {
+						'<blockquote>{SELTEXT}</blockquote>' : '[quote]{SELTEXT}[/quote]'
+					}
+				},
+				code : {
+					title : CURLANG.code,
+					buttonText : '[code]',
+					/* buttonHTML: '<span class="fonticon">\uE00d</span>', */
+					hotkey : 'ctrl+shift+4',
+					onlyClearText : true,
+					transform : {
+						'<code>{SELTEXT}</code>' : '[code]{SELTEXT}[/code]'
+					}
+				},
+				offtop : {
+					title : CURLANG.offtop,
+					buttonText : 'offtop',
+					transform : {
+						'<span style="font-size:10px;color:#ccc">{SELTEXT}</span>' : '[offtop]{SELTEXT}[/offtop]'
+					}
+				},
+				fontcolor : {
+					type : 'colorpicker',
+					title : CURLANG.fontcolor,
+					excmd : 'foreColor',
+					valueBBname : 'color',
+					subInsert : true,
+					colors : '#000000,#444444,#666666,#999999,#b6b6b6,#cccccc,#d8d8d8,#efefef,#f4f4f4,#ffffff,-, \
+										#ff0000,#980000,#ff7700,#ffff00,#00ff00,#00ffff,#1e84cc,#0000ff,#9900ff,#ff00ff,-, \
+										#f4cccc,#dbb0a7,#fce5cd,#fff2cc,#d9ead3,#d0e0e3,#c9daf8,#cfe2f3,#d9d2e9,#ead1dc, \
+										#ea9999,#dd7e6b,#f9cb9c,#ffe599,#b6d7a8,#a2c4c9,#a4c2f4,#9fc5e8,#b4a7d6,#d5a6bd, \
+										#e06666,#cc4125,#f6b26b,#ffd966,#93c47d,#76a5af,#6d9eeb,#6fa8dc,#8e7cc3,#c27ba0, \
+										#cc0000,#a61c00,#e69138,#f1c232,#6aa84f,#45818e,#3c78d8,#3d85c6,#674ea7,#a64d79, \
+										#900000,#85200C,#B45F06,#BF9000,#38761D,#134F5C,#1155Cc,#0B5394,#351C75,#741B47, \
+										#660000,#5B0F00,#783F04,#7F6000,#274E13,#0C343D,#1C4587,#073763,#20124D,#4C1130',
+					transform : {
+						'<font color="{COLOR}">{SELTEXT}</font>' : '[color={COLOR}]{SELTEXT}[/color]'
+					}
 				},
 				table : {
 					type : 'table',
@@ -260,47 +294,16 @@ var wbbdebug = true;
 					rows : 10,
 					cellwidth : 20,
 					transform : {
-						'<table class="wbb-table">{SELTEXT}</table>' : '[table]{SELTEXT}[/table]',
 						'<td>{SELTEXT}</td>' : '[td]{SELTEXT}[/td]',
 						'<tr>{SELTEXT}</tr>' : '[tr]{SELTEXT}[/tr]',
+						'<table class="wbb-table">{SELTEXT}</table>' : '[table]{SELTEXT}[/table]'
 					},
-					skipRules : true,
-				},
-				offtop : {
-					title : CURLANG.offtop,
-					buttonText : 'offtop',
-					transform : {
-						'<span style="font-size: 10px; color: #CCC">{SELTEXT}</span>' : '[offtop]{SELTEXT}[/offtop]',
-					},
-				},
-				fontcolor : {
-					type : 'colorpicker',
-					title : CURLANG.fontcolor,
-					excmd : 'foreColor',
-					valueBBname : 'color',
-					subInsert : true,
-					// we use an array of colors instead of a multi-line string
-					colors : [
-							'#000000', '#444444', '#666666', '#999999', '#b6b6b6', '#cccccc', '#d8d8d8', '#efefef', '#f4f4f4', '#ffffff', '-', '#ff0000', '#980000', '#ff7700', '#ffff00',
-							'#00ff00', '#00ffff', '#1e84cc', '#0000ff', '#9900ff', '#ff00ff', '-', '#f4cccc', '#dbb0a7', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3',
-							'#d9d2e9', '#ead1dc', '#ea9999', '#dd7e6b', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#a4c2f4', '#9fc5e8', '#b4a7d6', '#d5a6bd', '#e06666', '#cc4125', '#f6b26b',
-							'#ffd966', '#93c47d', '#76a5af', '#6d9eeb', '#6fa8dc', '#8e7cc3', '#c27ba0', '#cc0000', '#a61c00', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6',
-							'#674ea7', '#a64d79', '#900000', '#85200C', '#B45F06', '#BF9000', '#38761D', '#134F5C', '#1155Cc', '#0B5394', '#351C75', '#741B47', '#660000', '#5B0F00', '#783F04',
-							'#7F6000', '#274E13', '#0C343D', '#1C4587', '#073763', '#20124D', '#4C1130',
-					],
-					transform : {
-						'<span style="color: {COLOR}">{SELTEXT}</font>' : '[color={COLOR}]{SELTEXT}[/color]',
-					},
+					skipRules : true
 				},
 				fontsize : {
 					type : 'select',
 					title : CURLANG.fontsize,
-					options : [
-							'fs_tiny', 'fs_small', 'fs_normal', 'fs_big', 'fs_huge',
-					],
-					transform : {
-						'<span style="font-size: {SIZE}px;">{SELTEXT}</span>' : '[size={SIZE}]{SELTEXT}[/size]',
-					},
+					options : 'fs_verysmall,fs_small,fs_normal,fs_big,fs_verybig'
 				},
 				fontfamily : {
 					type : 'select',
@@ -310,147 +313,163 @@ var wbbdebug = true;
 					options : [
 							{
 								title : 'Arial',
-								exvalue : 'Arial',
+								exvalue : 'Arial'
 							}, {
 								title : 'Comic Sans MS',
-								exvalue : 'Comic Sans MS',
+								exvalue : 'Comic Sans MS'
 							}, {
 								title : 'Courier New',
-								exvalue : 'Courier New',
+								exvalue : 'Courier New'
 							}, {
 								title : 'Georgia',
-								exvalue : 'Georgia',
+								exvalue : 'Georgia'
 							}, {
 								title : 'Lucida Sans Unicode',
-								exvalue : 'Lucida Sans Unicode',
+								exvalue : 'Lucida Sans Unicode'
 							}, {
 								title : 'Tahoma',
-								exvalue : 'Tahoma',
+								exvalue : 'Tahoma'
 							}, {
 								title : 'Times New Roman',
-								exvalue : 'Times New Roman',
+								exvalue : 'Times New Roman'
 							}, {
 								title : 'Trebuchet MS',
-								exvalue : 'Trebuchet MS',
+								exvalue : 'Trebuchet MS'
 							}, {
 								title : 'Verdana',
-								exvalue : 'Verdana',
-							},
+								exvalue : 'Verdana'
+							}
 					],
 					transform : {
-						'<span style="font-family: {FONT}">{SELTEXT}</span>' : '[font={FONT}]{SELTEXT}[/font]',
-					},
+						'<font face="{FONT}">{SELTEXT}</font>' : '[font={FONT}]{SELTEXT}[/font]'
+					}
 				},
 				smilebox : {
 					type : 'smilebox',
 					title : CURLANG.smilebox,
-					buttonHTML : '<span class="fa fa-smile-o fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-smilebox1">\uE00b</span>'
 				},
-				alignleft : {
-					title : CURLANG.alignleft,
-					buttonHTML : '<span class="fa fa-align-left fa-fw"></span>',
+				justifyleft : {
+					title : CURLANG.justifyleft,
+					buttonHTML : '<span class="fonticon ve-tlb-textleft1">\uE015</span>',
 					groupkey : 'align',
 					transform : {
-						'<span style="text-align: left">{SELTEXT}</span>' : '[align=left]{SELTEXT}[/align]',
-					},
+						'<p style="text-align:left">{SELTEXT}</p>' : '[left]{SELTEXT}[/left]'
+					}
 				},
-				aligncenter : {
-					title : CURLANG.aligncenter,
-					buttonHTML : '<span class="fa fa-align-center fa-fw"></span>',
+				justifyright : {
+					title : CURLANG.justifyright,
+					buttonHTML : '<span class="fonticon ve-tlb-textright1">\uE016</span>',
 					groupkey : 'align',
 					transform : {
-						'<span style="text-align: center">{SELTEXT}</span>' : '[align=center]{SELTEXT}[/align]',
-					},
+						'<p style="text-align:right">{SELTEXT}</p>' : '[right]{SELTEXT}[/right]'
+					}
 				},
-				alignright : {
-					title : CURLANG.alignright,
-					buttonHTML : '<span class="fa fa-align-right fa-fw"></span>',
+				justifycenter : {
+					title : CURLANG.justifycenter,
+					buttonHTML : '<span class="fonticon ve-tlb-textcenter1">\uE014</span>',
 					groupkey : 'align',
 					transform : {
-						'<span style="text-align: right">{SELTEXT}</span>' : '[align=right]{SELTEXT}[/align]',
-					},
+						'<p style="text-align:center">{SELTEXT}</p>' : '[center]{SELTEXT}[/center]'
+					}
 				},
 				video : {
 					title : CURLANG.video,
-					buttonHTML : '<span class="fa fa-youtube-play fa-fw"></span>',
+					buttonHTML : '<span class="fonticon ve-tlb-video1">\uE008</span>',
 					modal : {
 						title : CURLANG.video,
 						width : '600px',
 						tabs : [
-								{
-									title : CURLANG.video,
-									input : [
-											{
-												param : 'SRC',
-												title : CURLANG.modal_video_text,
-											},
-									],
-								},
+							{
+								title : CURLANG.video,
+								input : [
+									{
+										param : 'SRC',
+										title : CURLANG.modal_video_text
+									}
+								]
+							}
 						],
 						onSubmit : function ( cmd, opt, queryState ) {
-							var url = this.modal.querySelector( 'input[name="SRC"]' ).value.trim();
-
-							// find and return the video ID
-							var id = url.match( /^.*(?:youtu.be\/|v\/|e\/|u\/\w+\/|embed\/|v=)([^#\&\?]*).*/ )[ 1 ];
-
-							if ( id ) {
+							var url = this.$modal.find( 'input[name="SRC"]' ).val();
+							if ( url ) {
+								url = url.replace( /^\s+/, '' ).replace( /\s+$/, '' );
+							}
+							var a;
+							if ( url.indexOf( 'youtu.be' ) !== -1 ) {
+								a = url.match( /^http[s]*:\/\/youtu\.be\/([a-z0-9_-]+)/i );
+							}
+							else {
+								a = url.match( /^http[s]*:\/\/www\.youtube\.com\/watch\?.*?v=([a-z0-9_-]+)/i );
+							}
+							if ( a && a.length === 2 ) {
+								var code = a[ 1 ];
 								this.insertAtCursor( this.getCodeByCommand( cmd, {
-									src : id,
+									src : code
 								} ) );
 							}
-
 							this.closeModal();
 							this.updateUI();
-
 							return false;
-						},
+						}
 					},
 					transform : {
-						'<iframe src="http://www.youtube.com/embed/{SRC}" width="640" height="480" frameborder="0"></iframe>' : '[video]{SRC}[/video]',
-					},
-				},
-				removeformat : {
-					title : CURLANG.removeFormat,
-					buttonHTML : '<span class="fa fa-remove fa-fw ve-tlb-removeformat1"></span>',
-					excmd : 'removeFormat',
+						'<iframe src="http://www.youtube.com/embed/{SRC}" width="640" height="480" frameborder="0"></iframe>' : '[video]{SRC}[/video]'
+					}
 				},
 
 				// select options
-				fs_tiny : {
-					title : CURLANG.size_tiny,
+				fs_verysmall : {
+					title : CURLANG.fs_verysmall,
 					buttonText : 'fs1',
+					excmd : 'fontSize',
+					exvalue : '1',
 					transform : {
-						'<span style="font-size: 9px;">{SELTEXT}</span>' : '[size=9]{SELTEXT}[/size]',
-					},
+						'<font size="1">{SELTEXT}</font>' : '[size=50]{SELTEXT}[/size]'
+					}
 				},
 				fs_small : {
-					title : CURLANG.size_small,
+					title : CURLANG.fs_small,
 					buttonText : 'fs2',
+					excmd : 'fontSize',
+					exvalue : '2',
 					transform : {
-						'<span style="font-size: 10px;">{SELTEXT}</span>' : '[size=10]{SELTEXT}[/size]',
-					},
+						'<font size="2">{SELTEXT}</font>' : '[size=85]{SELTEXT}[/size]'
+					}
 				},
 				fs_normal : {
-					title : CURLANG.size_normal,
+					title : CURLANG.fs_normal,
 					buttonText : 'fs3',
+					excmd : 'fontSize',
+					exvalue : '3',
 					transform : {
-						'<span style="font-size: 13px;">{SELTEXT}</span>' : '[size=13]{SELTEXT}[/size]',
-					},
+						'<font size="3">{SELTEXT}</font>' : '[size=100]{SELTEXT}[/size]'
+					}
 				},
 				fs_big : {
-					title : CURLANG.size_big,
+					title : CURLANG.fs_big,
 					buttonText : 'fs4',
+					excmd : 'fontSize',
+					exvalue : '4',
 					transform : {
-						'<span style="font-size: 18px;">{SELTEXT}</span>' : '[size=18]{SELTEXT}[/size]',
-					},
+						'<font size="4">{SELTEXT}</font>' : '[size=150]{SELTEXT}[/size]'
+					}
 				},
-				fs_huge : {
-					title : CURLANG.size_huge,
+				fs_verybig : {
+					title : CURLANG.fs_verybig,
 					buttonText : 'fs5',
+					excmd : 'fontSize',
+					exvalue : '6',
 					transform : {
-						'<span style="font-size: 25px;">{SELTEXT}</span>' : '[size=25]{SELTEXT}[/size]',
-					},
+						'<font size="6">{SELTEXT}</font>' : '[size=200]{SELTEXT}[/size]'
+					}
 				},
+
+				removeformat : {
+					title : CURLANG.removeFormat,
+					buttonHTML : '<span class="fonticon ve-tlb-removeformat1">\uE00f</span>',
+					excmd : 'removeFormat'
+				}
 			},
 			systr : {
 				'<br/>' : '\n',
@@ -491,7 +510,14 @@ var wbbdebug = true;
 						],
 				],
 			},
-			smileList : [ ],
+			smileList : [
+			// {
+			// title:CURLANG.sm1,
+			// img: '<img src="{themePrefix}{themeName}/img/smiles/sm1.png"
+			// class="sm">',
+			// bbcode:":)"
+			// },
+			],
 			attrWrap : [
 					'src', 'color', 'href',
 			],
@@ -512,9 +538,7 @@ var wbbdebug = true;
 		}
 
 		// check for preset
-		// DEPRECATED: this doesn't make sense. If someone calls this and wants to
-		// make changes why have presets when they can pass an object to $.wysibb()
-		if ( typeof WBBPRESET !== 'undefined' ) {
+		if ( typeof ( WBBPRESET ) !== 'undefined' ) {
 			if ( WBBPRESET.allButtons ) {
 				// clear transform
 				$.each( WBBPRESET.allButtons, $.proxy( function ( k, v ) {
@@ -523,7 +547,6 @@ var wbbdebug = true;
 					}
 				}, this ) );
 			}
-
 			$.extend( true, this.options, WBBPRESET );
 		}
 
@@ -534,7 +557,6 @@ var wbbdebug = true;
 				}
 			}, this ) );
 		}
-
 		$.extend( true, this.options, settings );
 		this.init();
 	};
@@ -542,12 +564,11 @@ var wbbdebug = true;
 	$.wysibb.prototype = {
 		lastid : 1,
 		init : function ( ) {
-			if ( wbbdebug ) $.log( 'Init', this );
-
+			log( 'Init', this );
 			// check for mobile
 			this.isMobile = function ( a ) {
-				/android|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|meego.+mobile|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i
-						.test( a );
+				( /android|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|meego.+mobile|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i
+						.test( a ) );
 			}( navigator.userAgent || navigator.vendor || window.opera );
 
 			// use bbmode on mobile devices
@@ -577,7 +598,7 @@ var wbbdebug = true;
 			// sort smiles
 			if ( this.options.smileList && this.options.smileList.length > 0 ) {
 				this.options.smileList.sort( function ( a, b ) {
-					return b.bbcode.length - a.bbcode.length;
+					return ( b.bbcode.length - a.bbcode.length );
 				} );
 			}
 
@@ -602,22 +623,19 @@ var wbbdebug = true;
 				this.options.initCallback.call( this );
 			}
 
-			$.log( this );
+			log( this );
 
 		},
 		initTransforms : function ( ) {
-			if ( wbbdebug ) $.log( 'Create rules for transform HTML=>BB' );
+			log( 'Create rules for transform HTML=>BB' );
 			var o = this.options;
-
 			// need to check for active buttons
 			if ( !o.rules ) {
 				o.rules = { };
 			}
-
 			if ( !o.groups ) {
 				o.groups = { };
-			}
-			// use for groupkey, For example:
+			} // use for groupkey, For example:
 			// justifyleft,justifyright,justifycenter. It is must replace each
 			// other.
 			var btnlist = o.buttons.slice();
@@ -629,7 +647,6 @@ var wbbdebug = true;
 				if ( !ob ) {
 					continue;
 				}
-
 				ob.en = true;
 
 				// check for simplebbcode
@@ -640,7 +657,7 @@ var wbbdebug = true;
 				}
 
 				// add transforms to option list
-				if ( ob.type === 'select' && typeof ob.options === 'string' ) {
+				if ( ob.type === 'select' && typeof ( ob.options ) === 'string' ) {
 					var olist = ob.options.split( ',' );
 					$.each( olist, function ( i, op ) {
 						if ( $.inArray( op, btnlist ) === -1 ) {
@@ -648,9 +665,14 @@ var wbbdebug = true;
 						}
 					} );
 				}
-
 				if ( ob.transform && ob.skipRules !== true ) {
 					var obtr = $.extend( { }, ob.transform );
+
+					/*
+					 * if (ob.addWrap) { //addWrap log("needWrap"); for (var bhtml in
+					 * obtr) { var bbcode = ob.transform[bhtml]; var newhtml = '<span
+					 * wbb="'+btnlist[bidx]+'">'+bhtml+'</span>'; obtr[newhtml] = bbcode; } }
+					 */
 
 					for ( var bhtml in obtr ) {
 						var orightml = bhtml;
@@ -660,11 +682,9 @@ var wbbdebug = true;
 						if ( !ob.bbSelector ) {
 							ob.bbSelector = [ ];
 						}
-
 						if ( $.inArray( bbcode, ob.bbSelector ) === -1 ) {
 							ob.bbSelector.push( bbcode );
 						}
-
 						if ( this.options.onlyBBmode === false ) {
 
 							// wrap attributes
@@ -675,13 +695,12 @@ var wbbdebug = true;
 
 							// check if current rootSelector is exist, create unique selector
 							// for each transform (1.2.2)
-							if ( rootSelector === 'div' || typeof o.rules[ rootSelector ] !== 'undefined' ) {
-								if ( wbbdebug ) $.log( 'create unique selector: ' + rootSelector );
-
+							if ( rootSelector === 'div' || typeof ( o.rules[ rootSelector ] ) !== 'undefined' ) {
 								// create unique selector
+								log( 'create unique selector: ' + rootSelector );
 								this.setUID( $bel.children() );
 								rootSelector = this.filterByNode( $bel.children() );
-								$.log( 'New rootSelector: ' + rootSelector );
+								log( 'New rootSelector: ' + rootSelector );
 								// replace transform with unique selector
 								var nhtml2 = $bel.html();
 								nhtml2 = this.unwrapAttrs( nhtml2 );
@@ -703,17 +722,16 @@ var wbbdebug = true;
 							}
 
 							// check for rules on this rootSeletor
-							if ( typeof o.rules[ rootSelector ] === 'undefined' ) {
+							if ( typeof ( o.rules[ rootSelector ] ) === 'undefined' ) {
 								o.rules[ rootSelector ] = [ ];
 							}
-
 							var crules = { };
 
 							if ( bhtml.match( /\{\S+?\}/ ) ) {
 								$bel.find( '*' ).each( $.proxy( function ( idx, el ) {
 									// check attributes
-									var attributes = this.getAttributeList( el );
 
+									var attributes = this.getAttributeList( el );
 									$.each( attributes, $.proxy( function ( i, item ) {
 										var attr = $( el ).attr( item );
 										if ( item.substr( 0, 1 ) === '_' ) {
@@ -726,11 +744,11 @@ var wbbdebug = true;
 												var rname = r[ a ].substr( 1, r[ a ].length - 2 );
 												rname = rname.replace( this.getValidationRGX( rname ), '' );
 												var p = this.relFilterByNode( el, rootSelector );
-												var regRepl = attr !== r[ a ] ? this.getRegexpReplace( attr, r[ a ] ) : false;
+												var regRepl = ( attr !== r[ a ] ) ? this.getRegexpReplace( attr, r[ a ] ) : false;
 												crules[ rname.toLowerCase() ] = {
-													sel : p ? $.trim( p ) : false,
+													sel : ( p ) ? $.trim( p ) : false,
 													attr : item,
-													rgx : regRepl,
+													rgx : regRepl
 												};
 											}
 										}
@@ -743,38 +761,32 @@ var wbbdebug = true;
 											return this.nodeType === 3;
 										} ).each( $.proxy( function ( i, rel ) {
 											var txt = rel.textContent || rel.data;
-											if ( typeof txt === 'undefined' ) return true;
-
+											if ( typeof ( txt ) === 'undefined' ) { return true; }
 											var r = txt.match( /\{\S+?\}/g );
-
 											if ( r ) {
 												for ( var a = 0; a < r.length; a++ ) {
 													var rname = r[ a ].substr( 1, r[ a ].length - 2 );
 													rname = rname.replace( this.getValidationRGX( rname ), '' );
 													var p = this.relFilterByNode( el, rootSelector );
-													var regRepl = txt !== r[ a ] ? this.getRegexpReplace( txt, r[ a ] ) : false;
-													var sel = p ? $.trim( p ) : false;
-
+													var regRepl = ( txt !== r[ a ] ) ? this.getRegexpReplace( txt, r[ a ] ) : false;
+													var sel = ( p ) ? $.trim( p ) : false;
 													if ( $.inArray( sel, sl ) > -1 || $( rel ).parent().contents().size() > 1 ) {
 														// has dublicate and not one children, need wrap
 														var nel = $( '<span>' ).html( '{' + rname + '}' );
-
 														this.setUID( nel, 'wbb' );
-
-														var start = txt.indexOf( rname ) + rname.length + 1;
+														var start = ( txt.indexOf( rname ) + rname.length ) + 1;
 														var after_txt = txt.substr( start, txt.length - start );
 														// create wrap element
 														rel.data = txt.substr( 0, txt.indexOf( rname ) - 1 );
 														$( rel ).after( this.elFromString( after_txt, document ) ).after( nel );
 
-														sel = sel ? sel + ' ' : '' + this.filterByNode( nel );
+														sel = ( ( sel ) ? sel + ' ' : '' ) + this.filterByNode( nel );
 														regRepl = false;
 													}
-
 													crules[ rname.toLowerCase() ] = {
 														sel : sel,
 														attr : false,
-														rgx : regRepl,
+														rgx : regRepl
 													};
 													sl[ sl.length ] = sel;
 												}
@@ -786,7 +798,6 @@ var wbbdebug = true;
 								}, this ) );
 
 								var nbhtml = $bel.html();
-
 								// UnWrap attributes
 								nbhtml = this.unwrapAttrs( nbhtml );
 								if ( orightml !== nbhtml ) {
@@ -798,7 +809,7 @@ var wbbdebug = true;
 
 							}
 							o.rules[ rootSelector ].push( [
-									bbcode, crules,
+									bbcode, crules
 							] );
 
 							// check for onlyClearText
@@ -827,9 +838,8 @@ var wbbdebug = true;
 					var htmll = $.map( ob.transform, function ( bb, html ) {
 						return html;
 					} ).sort( function ( a, b ) {
-						return ( b[ 0 ] || '' ).length - ( a[ 0 ] || '' ).length;
+						return ( ( b[ 0 ] || '' ).length - ( a[ 0 ] || '' ).length );
 					} );
-
 					ob.bbcode = ob.transform[ htmll[ 0 ] ];
 					ob.html = htmll[ 0 ];
 				}
@@ -848,17 +858,15 @@ var wbbdebug = true;
 					var $sm = $( this.strf( sm.img, o ) );
 					var f = this.filterByNode( $sm );
 					o.srules[ f ] = [
-							sm.bbcode, sm.img,
+							sm.bbcode, sm.img
 					];
 				}, this ) );
 			}
-
 			var rootsel;
-
 			// sort transforms by bbcode length desc
 			for ( rootsel in o.rules ) {
 				this.options.rules[ rootsel ].sort( function ( a, b ) {
-					return b[ 0 ].length - a[ 0 ].length;
+					return ( b[ 0 ].length - a[ 0 ].length );
 				} );
 			}
 
@@ -872,8 +880,9 @@ var wbbdebug = true;
 
 		// BUILD
 		build : function ( ) {
-			if ( wbbdebug ) $.log( 'Build editor' );
+			log( 'Build editor' );
 
+			// this.$editor = $('<div class="wysibb">');
 			this.$editor = $( '<div>' ).addClass( 'wysibb' );
 
 			if ( this.isMobile ) {
@@ -896,10 +905,10 @@ var wbbdebug = true;
 			if ( this.options.onlyBBmode === false ) {
 				var height = this.options.minheight || this.$txtArea.outerHeight();
 				var maxheight = this.options.resize_maxheight;
-				var mheight = this.options.autoresize === true ? this.options.resize_maxheight : height;
+				var mheight = ( this.options.autoresize === true ) ? this.options.resize_maxheight : height;
 				this.$body = $( this.strf( '<div class="wysibb-text-editor" style="max-height:{maxheight}px;min-height:{height}px"></div>', {
 					maxheight : mheight,
-					height : height,
+					height : height
 				} ) ).insertAfter( this.$txtArea );
 				this.body = this.$body[ 0 ];
 				this.$txtArea.hide();
@@ -908,7 +917,7 @@ var wbbdebug = true;
 					this.$toolbar.css( 'max-height', height );
 				}
 
-				if ( wbbdebug ) $.log( 'WysiBB loaded' );
+				log( 'WysiBB loaded' );
 
 				this.$body.addClass( 'wysibb-body' ).addClass( this.options.bodyClass );
 
@@ -919,7 +928,6 @@ var wbbdebug = true;
 
 				if ( 'contentEditable' in this.body ) {
 					this.body.contentEditable = true;
-
 					try {
 						// fix for mfirefox
 						// document.execCommand('enableObjectResizing', false, 'false');
@@ -943,36 +951,38 @@ var wbbdebug = true;
 				}
 
 				// clear html on paste from external editors
-				this.$body.bind( 'paste', $.proxy( function ( e ) {
-					if ( !this.$pasteBlock ) {
-						this.saveRange();
-						this.$pasteBlock = $( this.elFromString( '<div style="opacity:0;" contenteditable="true">\uFEFF</div>' ) );
+				this.$body.bind( 'keydown', $.proxy( function ( e ) {
+					if ( ( e.which === 86 && ( e.ctrlKey === true || e.metaKey === true ) ) || ( e.which === 45 && ( e.shiftKey === true || e.metaKey === true ) ) ) {
+						if ( !this.$pasteBlock ) {
+							this.saveRange();
+							this.$pasteBlock = $( this.elFromString( '<div style="opacity:0;" contenteditable="true">\uFEFF</div>' ) );
 
-						this.$pasteBlock.appendTo( this.body );
-						// if (!$.support.search?type=2) {this.$pasteBlock.focus();} //IE
-						// 7,8 FIX
-						setTimeout( $.proxy( function ( ) {
-							this.clearPaste( this.$pasteBlock );
-							var rdata = '<span>' + this.$pasteBlock.html() + '</span>';
-							this.$body.attr( 'contentEditable', 'true' );
-							this.$pasteBlock.blur().remove();
-							this.body.focus();
+							this.$pasteBlock.appendTo( this.body );
+							// if (!$.support.search?type=2) {this.$pasteBlock.focus();} //IE
+							// 7,8 FIX
+							setTimeout( $.proxy( function ( ) {
+								this.clearPaste( this.$pasteBlock );
+								var rdata = '<span>' + this.$pasteBlock.html() + '</span>';
+								this.$body.attr( 'contentEditable', 'true' );
+								this.$pasteBlock.blur().remove();
+								this.body.focus();
 
-							if ( this.cleartext ) {
-								$.log( 'Check if paste to clearText Block' );
-								if ( this.isInClearTextBlock() ) {
-									rdata = this.toBB( rdata ).replace( /\n/g, '<br>' ).replace( /\s{3}/g, '<span class="wbbtab"></span>' );
+								if ( this.cleartext ) {
+									log( 'Check if paste to clearText Block' );
+									if ( this.isInClearTextBlock() ) {
+										rdata = this.toBB( rdata ).replace( /\n/g, '<br/>' ).replace( /\s{3}/g, '<span class="wbbtab"></span>' );
+									}
 								}
-							}
-							rdata = rdata.replace( /\t/g, '<span class="wbbtab"></span>' );
-							this.selectRange( this.lastRange );
-							this.insertAtCursor( rdata, false );
-							this.lastRange = false;
-							this.$pasteBlock = false;
-						}, this ), 1 );
-						this.selectNode( this.$pasteBlock[ 0 ] );
+								rdata = rdata.replace( /\t/g, '<span class="wbbtab"></span>' );
+								this.selectRange( this.lastRange );
+								this.insertAtCursor( rdata, false );
+								this.lastRange = false;
+								this.$pasteBlock = false;
+							}, this ), 1 );
+							this.selectNode( this.$pasteBlock[ 0 ] );
+						}
+						return true;
 					}
-					return true;
 				}, this ) );
 
 				// insert BR on press enter
@@ -1024,7 +1034,7 @@ var wbbdebug = true;
 					this.$bresize = $( this.elFromString( '<div class="bottom-resize-line"></div>' ) ).appendTo( this.$editor ).wdrag( {
 						scope : this,
 						axisY : true,
-						height : height,
+						height : height
 					} );
 				}
 
@@ -1046,23 +1056,16 @@ var wbbdebug = true;
 			}
 		},
 		buildToolbar : function ( ) {
-			if ( this.options.toolbar === false ) { return false; }
-
-			// this.$toolbar = $('<div
-			// class="wysibb-toolbar">').prependTo(this.$editor);
-			this.$toolbar = $( '<ul>' ).addClass( 'wysibb-toolbar' ).prependTo( this.$editor );
-
+			this.$toolbar = $( '<div>' ).addClass( 'wysibb-toolbar' ).prependTo( this.$editor );
 			var $btnContainer;
 			$.each( this.options.buttons, $.proxy( function ( i, bn ) {
 				var opt = this.options.allButtons[ bn ];
-				if ( i !== 0 || bn !== '|' ) {
-					$btnContainer = $( '<li>' ).appendTo( this.$toolbar );
+				if ( i === 0 || bn === '|' || bn === '-' ) {
+					if ( bn === '-' ) {
+						this.$toolbar.append( '<div>' );
+					}
+					$btnContainer = $( '<div class="wysibb-toolbar-container">' ).appendTo( this.$toolbar );
 				}
-
-				if ( bn === '-' ) {
-					this.$toolbar.append( '<li class="">' );
-				}
-
 				if ( opt ) {
 					if ( opt.type === 'colorpicker' ) {
 						this.buildColorpicker( $btnContainer, bn, opt );
@@ -1083,45 +1086,47 @@ var wbbdebug = true;
 			}, this ) );
 
 			// fix for hide tooltip on quick mouse over
-			this.$toolbar.find( '.button-tooltip' ).hover( function ( ) {
+			this.$toolbar.find( '.btn-tooltip' ).hover( function ( ) {
 				$( this ).parent().css( 'overflow', 'hidden' );
 			}, function ( ) {
 				$( this ).parent().css( 'overflow', 'visible' );
 			} );
 
 			// build bbcode switch button
-			var $bbsw = $( document.createElement( 'li' ) ).addClass( 'mode-switch' )
-					.html( '<button class="wysibb-button mswitch" unselectable="on" type="button"><span class="button-inner modesw" unselectable="on">[bbcode]</span></div>' )
-					.appendTo( this.$toolbar );
+			// var $bbsw = $('<div class="wysibb-toolbar-container modeSwitch"><div
+			// class="wysibb-toolbar-btn" unselectable="on"><span class="btn-inner
+			// ve-tlb-bbcode"
+			// unselectable="on"></span></div></div>').appendTo(this.$toolbar);
+			var $bbsw = $( document.createElement( 'div' ) ).addClass( 'wysibb-toolbar-container modeSwitch' )
+					.html( '<div class="wysibb-toolbar-btn mswitch" unselectable="on"><span class="btn-inner modesw" unselectable="on">[bbcode]</span></div>' ).appendTo( this.$toolbar );
 			if ( this.options.bbmode === true ) {
-				$bbsw.addClass( 'active' );
+				$bbsw.children( '.wysibb-toolbar-btn' ).addClass( 'on' );
 			}
 			if ( this.options.onlyBBmode === false ) {
-				$bbsw.children( '.wysibb-button' ).on( 'click', $.proxy( function ( e ) {
-					$( e.currentTarget.parentNode ).toggleClass( 'active' );
+				$bbsw.children( '.wysibb-toolbar-btn' ).click( $.proxy( function ( e ) {
+					$( e.currentTarget ).toggleClass( 'on' );
 					this.modeSwitch();
 				}, this ) );
 			}
 		},
 		buildButton : function ( container, bn, opt ) {
-			if ( typeof container !== 'object' ) {
+			if ( typeof ( container ) !== 'object' ) {
 				container = this.$toolbar;
 			}
-			var btnHTML = opt.buttonHTML ? $( this.strf( opt.buttonHTML, this.options ) ).addClass( 'button-inner' ) : this
-					.strf( '<span class="button-inner button-text">{text}</span>', {
-						text : opt.buttonText.replace( /</g, '&lt;' ),
-					} );
-			var hotkey = this.options.hotkeys === true && this.options.showHotkeys === true && opt.hotkey ? ' <span class="tthotkey">[' + opt.hotkey + ']</span>' : '';
-			var $btn = $( '<button class="wysibb-button wbb-' + bn + '" type="button">' ).appendTo( container ).append( btnHTML ).append( this
-					.strf( '<span class="button-tooltip">{title}<kbd>{hotkey}</kbd></span>', {
+			var btnHTML = ( opt.buttonHTML ) ? $( this.strf( opt.buttonHTML, this.options ) ).addClass( 'btn-inner' ) : this.strf( '<span class="btn-inner btn-text">{text}</span>', {
+				text : opt.buttonText.replace( /</g, '&lt;' )
+			} );
+			var hotkey = ( this.options.hotkeys === true && this.options.showHotkeys === true && opt.hotkey ) ? ( ' <span class="tthotkey">[' + opt.hotkey + ']</span>' ) : '';
+			var $btn = $( '<div class="wysibb-toolbar-btn wbb-' + bn + '">' ).appendTo( container ).append( btnHTML ).append( this
+					.strf( '<span class="btn-tooltip">{title}<ins/>{hotkey}</span>', {
 						title : opt.title,
-						hotkey : hotkey,
+						hotkey : hotkey
 					} ) );
 
 			// attach events
 			this.controllers.push( $btn );
 			$btn.bind( 'queryState', $.proxy( function ( e ) {
-				this.queryState( bn ) ? $( e.currentTarget.parentNode ).addClass( 'active' ) : $( e.currentTarget.parentNode ).removeClass( 'active' );
+				( this.queryState( bn ) ) ? $( e.currentTarget ).addClass( 'on' ) : $( e.currentTarget ).removeClass( 'on' );
 			}, this ) );
 			$btn.mousedown( $.proxy( function ( e ) {
 				e.preventDefault();
@@ -1130,24 +1135,15 @@ var wbbdebug = true;
 			}, this ) );
 		},
 		buildColorpicker : function ( container, bn, opt ) {
-			var $btnHTML;
-			if ( typeof opt.buttonHTML !== 'undefined' ) {
-				$btnHTML = $( opt.buttonHTML );
-			}
-			else {
-				$btnHTML = $( '<div><span class="fa fa-font fa-fw"></span><span class="cp-line"></span><span class="fa fa-caret-down fa-fw ar"></span></div>' );
-			}
-			$btnHTML.addClass( 've-tlb-colorpick' );
-
-			var $btn = $( '<button class="wysibb-button wbb-dropdown wbb-cp" type="button">' ).appendTo( container ).append( $btnHTML ).append( this
-					.strf( '<span class="button-tooltip">{title}</span>', {
-						title : opt.title,
-					} ) );
+			var $btn = $( '<div class="wysibb-toolbar-btn wbb-dropdown wbb-cp">' ).appendTo( container )
+					.append( '<div class="ve-tlb-colorpick"><span class="fonticon">\uE010</span><span class="cp-line"></span></div><ins class="fonticon ar">\uE011</ins>' ).append( this
+							.strf( '<span class="btn-tooltip">{title}<ins/></span>', {
+								title : opt.title
+							} ) );
 			var $cpline = $btn.find( '.cp-line' );
 
-			var $dropblock = $( '<div class="wbb-list">' ).appendTo( container );
+			var $dropblock = $( '<div class="wbb-list">' ).appendTo( $btn );
 			$dropblock.append( '<div class="nc">' + CURLANG.auto + '</div>' );
-
 			var colorlist;
 			if ( opt.colors && Array.isArray( opt.colors ) ) {
 				colorlist = opt.colors;
@@ -1158,7 +1154,6 @@ var wbbdebug = true;
 			else {
 				colorlist = [ ];
 			}
-
 			for ( var j = 0; j < colorlist.length; j++ ) {
 				colorlist[ j ] = $.trim( colorlist[ j ] );
 				if ( colorlist[ j ] === '-' ) {
@@ -1167,7 +1162,7 @@ var wbbdebug = true;
 				}
 				else {
 					$dropblock.append( this.strf( '<div class="sc" style="background:{color}" title="{color}"></div>', {
-						color : colorlist[ j ],
+						color : colorlist[ j ]
 					} ) );
 				}
 			}
@@ -1179,8 +1174,8 @@ var wbbdebug = true;
 				$cpline.css( 'background-color', basecolor );
 				var r = this.queryState( bn, true );
 				if ( r ) {
-					$cpline.css( 'background-color', this.options.bbmode ? r.color : r );
-					$btn.find( '.ve-tlb-colorpick' ).css( 'color', this.options.bbmode ? r.color : r );
+					$cpline.css( 'background-color', ( this.options.bbmode ) ? r.color : r );
+					$btn.find( '.ve-tlb-colorpick span.fonticon' ).css( 'color', ( this.options.bbmode ) ? r.color : r );
 				}
 			}, this ) );
 			$btn.mousedown( $.proxy( function ( e ) {
@@ -1205,16 +1200,16 @@ var wbbdebug = true;
 			} );
 		},
 		buildTablepicker : function ( container, bn, opt ) {
-			var $btn = $( '<button class="wysibb-button wbb-dropdown wbb-tbl" type="button">' ).appendTo( container )
-					.append( '<span class="button-inner fa fa-table fa-fw ve-tlb-table1"></span><span class="fa fa-caret-down fa-fw"></span>' ).append( this
-							.strf( '<span class="button-tooltip">{title}</span>', {
-								title : opt.title,
+			var $btn = $( '<div class="wysibb-toolbar-btn wbb-dropdown wbb-tbl">' ).appendTo( container )
+					.append( '<span class="btn-inner fonticon ve-tlb-table1">\uE00e</span><ins class="fonticon ar">\uE011</ins>' ).append( this
+							.strf( '<span class="btn-tooltip">{title}<ins/></span>', {
+								title : opt.title
 							} ) );
 
-			var $listblock = $( '<div class="wbb-list">' ).appendTo( container );
+			var $listblock = $( '<div class="wbb-list">' ).appendTo( $btn );
 			var $dropblock = $( '<div>' ).css( {
-				'position' : 'relative',
-				'box-sizing' : 'border-box',
+				"position" : 'relative',
+				"box-sizing" : 'border-box'
 			} ).appendTo( $listblock );
 			var rows = opt.rows || 10;
 			var cols = opt.cols || 10;
@@ -1226,7 +1221,7 @@ var wbbdebug = true;
 					// style="width:{width}px;height:{height}px;z-index:{zindex}"
 					// title="{row},{col}"></div>',{width: (j*opt.cellwidth),height:
 					// (h*opt.cellwidth),zindex: --allcount,row:h,col:j});
-					var html = '<div class="tbl-sel" style="width:' + j * 100 / cols + '%;height:' + h * 100 / rows + '%;z-index:' + --allcount + '" title="' + h + ',' + j + '"></div>';
+					var html = '<div class="tbl-sel" style="width:' + ( j * 100 / cols ) + '%;height:' + ( h * 100 / rows ) + '%;z-index:' + ( --allcount ) + '" title="' + h + ',' + j + '"></div>';
 					$dropblock.append( html );
 				}
 			}
@@ -1235,15 +1230,15 @@ var wbbdebug = true;
 				e.preventDefault();
 				var t = $( e.currentTarget ).attr( 'title' );
 				var rc = t.split( ',' );
-				var code = this.options.bbmode ? '[table]' : '<table class="wbb-table" cellspacing="5" cellpadding="0">';
+				var code = ( this.options.bbmode ) ? '[table]' : '<table class="wbb-table" cellspacing="5" cellpadding="0">';
 				for ( var i = 1; i <= rc[ 0 ]; i++ ) {
-					code += this.options.bbmode ? ' [tr]\n' : '<tr>';
+					code += ( this.options.bbmode ) ? ' [tr]\n' : '<tr>';
 					for ( var j = 1; j <= rc[ 1 ]; j++ ) {
-						code += this.options.bbmode ? '  [td][/td]\n' : '<td>\uFEFF</td>';
+						code += ( this.options.bbmode ) ? '  [td][/td]\n' : '<td>\uFEFF</td>';
 					}
-					code += this.options.bbmode ? '[/tr]\n' : '</tr>';
+					code += ( this.options.bbmode ) ? '[/tr]\n' : '</tr>';
 				}
-				code += this.options.bbmode ? '[/table]' : '</table>';
+				code += ( this.options.bbmode ) ? '[/table]' : '</table>';
 				this.insertAtCursor( code );
 			}, this ) );
 			// this.debug("END Attach event on: tbl-sel");
@@ -1254,24 +1249,24 @@ var wbbdebug = true;
 
 		},
 		buildSelect : function ( container, bn, opt ) {
-			var $btn = $( '<button class="wysibb-button wbb-select wbb-' + bn + '" type="button">' ).appendTo( container ).append( this
-					.strf( '<span class="val">{title}</span><span class="fa fa-caret-down fa-fw"></span>', opt ) ).append( this.strf( '<span class="button-tooltip">{title}</span>', {
-				title : opt.title,
+			var $btn = $( '<div class="wysibb-toolbar-btn wbb-select wbb-' + bn + '">' ).appendTo( container ).append( this
+					.strf( '<span class="val">{title}</span><ins class="fonticon sar">\uE012</ins>', opt ) ).append( this.strf( '<span class="btn-tooltip">{title}<ins/></span>', {
+				title : opt.title
 			} ) );
-			var $sblock = $( '<div class="wbb-list">' ).appendTo( container );
-			var $sval = $btn.find( '.val' );
+			var $sblock = $( '<div class="wbb-list">' ).appendTo( $btn );
+			var $sval = $btn.find( 'span.val' );
 
-			var olist = $.isArray( opt.options ) ? opt.options : opt.options.split( ',' );
-			var $selectbox = this.isMobile ? $( '<select>' ).addClass( 'wbb-selectbox' ) : '';
+			var olist = ( $.isArray( opt.options ) ) ? opt.options : opt.options.split( ',' );
+			var $selectbox = ( this.isMobile ) ? $( '<select>' ).addClass( 'wbb-selectbox' ) : '';
 			for ( var i = 0; i < olist.length; i++ ) {
 				var oname = olist[ i ];
-				if ( typeof oname === 'string' ) {
+				if ( typeof ( oname ) === 'string' ) {
 					var option = this.options.allButtons[ oname ];
 					if ( option ) {
-						// $.log("create: "+oname);
+						// log('create: '+oname);
 						if ( option.html ) {
 							$( '<span>' ).addClass( 'option' ).attr( 'oid', oname ).attr( 'cmdvalue', option.exvalue ).appendTo( $sblock ).append( this.strf( option.html, {
-								seltext : option.title,
+								seltext : option.title
 							} ) );
 						}
 						else {
@@ -1287,7 +1282,7 @@ var wbbdebug = true;
 				else {
 					// build option list from array
 					var params = {
-						seltext : oname.title,
+						seltext : oname.title
 					};
 					params[ opt.valueBBname ] = oname.exvalue;
 					$( '<span>' ).addClass( 'option' ).attr( 'oid', bn ).attr( 'cmdvalue', oname.exvalue ).appendTo( $sblock ).append( this.strf( opt.html, params ) );
@@ -1308,7 +1303,7 @@ var wbbdebug = true;
 						var $el = $( el );
 						var r = this.queryState( $el.attr( 'oid' ), true );
 						var cmdvalue = $el.attr( 'cmdvalue' );
-						if ( cmdvalue && r === $el.attr( 'cmdvalue' ) || !cmdvalue && r ) {
+						if ( ( cmdvalue && r === $el.attr( 'cmdvalue' ) ) || ( !cmdvalue && r ) ) {
 							$el.prop( 'selected', true );
 							return false;
 						}
@@ -1335,14 +1330,13 @@ var wbbdebug = true;
 					var $el = $( el );
 					var r = this.queryState( $el.attr( 'oid' ), true );
 					var cmdvalue = $el.attr( 'cmdvalue' );
-					if ( cmdvalue && r === $el.attr( 'cmdvalue' ) || !cmdvalue && r ) {
+					if ( ( cmdvalue && r === $el.attr( 'cmdvalue' ) ) || ( !cmdvalue && r ) ) {
 						$sval.text( $el.text() );
 						$el.addClass( 'selected' );
 						return false;
 					}
 				}, this ) );
 			}, this ) );
-
 			$btn.mousedown( $.proxy( function ( e ) {
 				e.preventDefault();
 				this.dropdownclick( '.wbb-select', '.wbb-list', e );
@@ -1358,10 +1352,10 @@ var wbbdebug = true;
 		},
 		buildSmilebox : function ( container, bn, opt ) {
 			if ( this.options.smileList && this.options.smileList.length > 0 ) {
-				var $btnHTML = $( this.strf( opt.buttonHTML, opt ) ).addClass( 'button-inner' );
-				var $btn = $( '<button class="wysibb-button wbb-smilebox wbb-' + bn + '" type="button">' ).appendTo( container ).append( $btnHTML ).append( this
-						.strf( '<span class="button-tooltip">{title}</span>', {
-							title : opt.title,
+				var $btnHTML = $( this.strf( opt.buttonHTML, opt ) ).addClass( 'btn-inner' );
+				var $btn = $( '<div class="wysibb-toolbar-btn wbb-smilebox wbb-' + bn + '">' ).appendTo( container ).append( $btnHTML ).append( this
+						.strf( '<span class="btn-tooltip">{title}<ins/></span>', {
+							title : opt.title
 						} ) );
 				var $sblock = $( '<div class="wbb-list">' ).appendTo( $btn );
 				if ( $.isArray( this.options.smileList ) ) {
@@ -1376,12 +1370,12 @@ var wbbdebug = true;
 				$btn.find( '.smile' ).mousedown( $.proxy( function ( e ) {
 					e.preventDefault();
 					// this.selectLastRange();
-					this.insertAtCursor( this.options.bbmode ? this.toBB( $( e.currentTarget ).html() ) : $( $( e.currentTarget ).html() ) );
+					this.insertAtCursor( ( this.options.bbmode ) ? this.toBB( $( e.currentTarget ).html() ) : $( $( e.currentTarget ).html() ) );
 				}, this ) );
 			}
 		},
 		updateUI : function ( e ) {
-			if ( !e || ( e.which >= 8 && e.which <= 46 || e.which > 90 || e.type === 'mouseup' ) ) {
+			if ( !e || ( ( e.which >= 8 && e.which <= 46 ) || e.which > 90 || e.type === 'mouseup' ) ) {
 				$.each( this.controllers, $.proxy( function ( i, $btn ) {
 					$btn.trigger( 'queryState' );
 				}, this ) );
@@ -1394,16 +1388,14 @@ var wbbdebug = true;
 		initModal : function ( ) {
 			this.$modal = $( '#wbbmodal' );
 			if ( this.$modal.size() === 0 ) {
-				if ( wbbdebug ) $.log( 'Init modal' );
-
+				log( 'Init modal' );
 				this.$modal = $( '<div>' )
 						.attr( 'id', 'wbbmodal' )
-						.attr( 'class', 'wysibb-modal' )
 						.prependTo( document.body )
 						.html( '<div class="wbbm"><div class="wbbm-title"><span class="wbbm-title-text"></span><span class="wbbclose" title="' + CURLANG.close + '">×</span></div><div class="wbbm-content"></div><div class="wbbm-bottom"><button id="wbbm-submit" class="wbb-button">' + CURLANG.save + '</button><button id="wbbm-cancel" class="wbb-cancel-button">' + CURLANG.cancel + '</button><button id="wbbm-remove" class="wbb-remove-button">' + CURLANG.remove + '</button></div></div>' )
 						.hide();
 
-				this.$modal.find( '#wbbm-cancel,.wbbclose' ).on( 'click', $.proxy( this.closeModal, this ) );
+				this.$modal.find( '#wbbm-cancel,.wbbclose' ).click( $.proxy( this.closeModal, this ) );
 				this.$modal.bind( 'click', $.proxy( function ( e ) {
 					if ( $( e.target ).parents( '.wbbm' ).size() === 0 ) {
 						this.closeModal();
@@ -1417,7 +1409,7 @@ var wbbdebug = true;
 			}
 		},
 		initHotkeys : function ( ) {
-			$.log( 'initHotkeys' );
+			log( 'initHotkeys' );
 			this.hotkeys = [ ];
 			var klist = '0123456789       abcdefghijklmnopqrstuvwxyz';
 			$.each( this.options.allButtons, $.proxy( function ( cmd, opt ) {
@@ -1442,7 +1434,7 @@ var wbbdebug = true;
 								}
 							}
 						} );
-						// $.log("metasum: "+metasum+" key: "+key+" code:
+						// log("metasum: "+metasum+" key: "+key+" code:
 						// "+(klist.indexOf(key)+48));
 						if ( metasum > 0 ) {
 							if ( !this.hotkeys[ 'm' + metasum ] ) {
@@ -1456,8 +1448,7 @@ var wbbdebug = true;
 		},
 		presskey : function ( e ) {
 			if ( e.ctrlKey === true || e.shiftKey === true || e.altKey === true ) {
-				var metasum = ( e.ctrlKey === true ? 1 : 0 ) + ( e.shiftKey === true ? 4 : 0 ) + ( e.altKey === true ? 7 : 0 );
-
+				var metasum = ( ( e.ctrlKey === true ) ? 1 : 0 ) + ( ( e.shiftKey === true ) ? 4 : 0 ) + ( ( e.altKey === true ) ? 7 : 0 );
 				if ( this.hotkeys[ 'm' + metasum ] && this.hotkeys[ 'm' + metasum ][ 'k' + e.which ] ) {
 					this.execCommand( this.hotkeys[ 'm' + metasum ][ 'k' + e.which ], false );
 					e.preventDefault();
@@ -1468,24 +1459,19 @@ var wbbdebug = true;
 
 		// COgdfMMAND FUNCTIONS
 		execCommand : function ( command, value ) {
-			if ( wbbdebug ) $.log( 'execCommand: ' + command );
-
+			log( 'execCommand: ' + command );
 			var opt = this.options.allButtons[ command ];
-
-			if ( opt.en !== true ) return false;
-
+			if ( opt.en !== true ) { return false; }
 			var queryState = this.queryState( command, value );
 
 			// check for onlyClearText
 			var skipcmd = this.isInClearTextBlock();
-
-			if ( skipcmd && skipcmd !== command ) return;
+			if ( skipcmd && skipcmd !== command ) { return; }
 
 			if ( opt.excmd ) {
 				// use NativeCommand
 				if ( this.options.bbmode ) {
-					if ( wbbdebug ) $.log( 'Native command in bbmode: ' + command );
-
+					log( 'Native command in bbmode: ' + command );
 					if ( queryState && opt.subInsert !== true ) {
 						// remove bbcode
 						this.wbbRemoveCallback( command, value );
@@ -1518,12 +1504,11 @@ var wbbdebug = true;
 			var opt = this.options.allButtons[ command ];
 			if ( opt.en !== true ) { return false; }
 			// if (opt.subInsert===true && opt.type!="colorpicker") {return false;}
-
-			var i, len;
+			var i;
 			if ( this.options.bbmode ) {
 				// bbmode
 				if ( opt.bbSelector ) {
-					for ( i = 0, len = opt.bbSelector.length; i < len; i++ ) {
+					for ( i = 0; i < opt.bbSelector.length; i++ ) {
 						var b = this.isBBContain( opt.bbSelector[ i ] );
 						if ( b ) { return this.getParams( b, opt.bbSelector[ i ], b[ 1 ] ); }
 					}
@@ -1556,8 +1541,10 @@ var wbbdebug = true;
 								// selected
 								return false;
 							}
-							else if ( opt.excmd === 'underline' && $( this.getSelectNode() ).closest( 'a' ).size() > 0 ) {
-								// fix, when link select
+							else if ( opt.excmd === 'underline' && $( this.getSelectNode() ).closest( 'a' ).size() > 0 ) { // fix,
+								// when
+								// link
+								// select
 								return false;
 							}
 							return document.queryCommandState( opt.excmd );
@@ -1570,7 +1557,7 @@ var wbbdebug = true;
 				else {
 					// custom command
 					if ( $.isArray( opt.rootSelector ) ) {
-						for ( i = 0, len = opt.rootSelector.length; i < len; i++ ) {
+						for ( i = 0; i < opt.rootSelector.length; i++ ) {
 							var n = this.isContain( this.getSelectNode(), opt.rootSelector[ i ] );
 							if ( n ) { return this.getParams( n, opt.rootSelector[ i ] ); }
 						}
@@ -1583,7 +1570,7 @@ var wbbdebug = true;
 			// command for
 			// custom
 			// bbcodes
-			if ( wbbdebug ) $.log( 'wbbExecCommand' );
+			log( 'wbbExecCommand' );
 			var opt = this.options.allButtons[ command ];
 			if ( opt ) {
 				if ( opt.modal ) {
@@ -1626,11 +1613,10 @@ var wbbdebug = true;
 			}
 		},
 		wbbInsertCallback : function ( command, paramobj ) {
-			if ( typeof paramobj !== 'object' ) {
+			if ( typeof ( paramobj ) !== 'object' ) {
 				paramobj = { };
 			}
-
-			if ( wbbdebug ) $.log( 'wbbInsertCallback: ' + command );
+			log( 'wbbInsertCallback: ' + command );
 			var data = this.getCodeByCommand( command, paramobj );
 			this.insertAtCursor( data );
 
@@ -1642,15 +1628,13 @@ var wbbdebug = true;
 			}
 		},
 		wbbRemoveCallback : function ( command, clear ) {
-			if ( wbbdebug ) $.log( 'wbbRemoveCallback: ' + command );
+			log( 'wbbRemoveCallback: ' + command );
 			var opt = this.options.allButtons[ command ];
 			if ( this.options.bbmode ) {
 				// bbmode
 				// REMOVE BBCODE
-				// NOTE: pos is never used
 				var pos = this.getCursorPosBB();
 				var stextnum = 0;
-
 				$.each( opt.bbSelector, $.proxy( function ( i, bbcode ) {
 					var stext = bbcode.match( /\{[\s\S]+?\}/g );
 					$.each( stext, function ( n, s ) {
@@ -1662,7 +1646,7 @@ var wbbdebug = true;
 					var a = this.isBBContain( bbcode );
 					if ( a ) {
 						this.txtArea.value = this.txtArea.value.substr( 0, a[ 1 ] ) + this.txtArea.value.substr( a[ 1 ], this.txtArea.value.length - a[ 1 ] )
-								.replace( a[ 0 ][ 0 ], clear === true ? '' : a[ 0 ][ stextnum + 1 ] );
+								.replace( a[ 0 ][ 0 ], ( clear === true ) ? '' : a[ 0 ][ stextnum + 1 ] );
 						this.setCursorPosBB( a[ 1 ] );
 						return false;
 					}
@@ -1671,7 +1655,7 @@ var wbbdebug = true;
 			else {
 				var node = this.getSelectNode();
 				$.each( opt.rootSelector, $.proxy( function ( i, s ) {
-					// $.log("RS: "+s);
+					// log('RS: '+s);
 					var root = this.isContain( node, s );
 					if ( !root ) { return true; }
 					var $root = $( root );
@@ -1717,8 +1701,8 @@ var wbbdebug = true;
 						}
 						var ins = this.elFromString( shtml );
 
-						var before_rng = window.getSelection ? rng.cloneRange() : this.body.createTextRange();
-						var after_rng = window.getSelection ? rng.cloneRange() : this.body.createTextRange();
+						var before_rng = ( window.getSelection ) ? rng.cloneRange() : this.body.createTextRange();
+						var after_rng = ( window.getSelection ) ? rng.cloneRange() : this.body.createTextRange();
 
 						if ( window.getSelection ) {
 							this.insertAtCursor( '<span id="wbbdivide"></span>' );
@@ -1754,11 +1738,11 @@ var wbbdebug = true;
 			}
 		},
 		execNativeCommand : function ( cmd, param ) {
-			// $.log("execNativeCommand: '"+cmd+"' : "+param);
+			// log("execNativeCommand: '"+cmd+"' : "+param);
 			this.body.focus(); // set focus to frame body
 			if ( cmd === 'insertHTML' && !window.getSelection ) { // IE does't support
 				// insertHTML
-				var r = this.lastRange ? this.lastRange : document.selection.createRange(); // IE
+				var r = ( this.lastRange ) ? this.lastRange : document.selection.createRange(); // IE
 				// 7,8
 				// range
 				// lost
@@ -1768,7 +1752,7 @@ var wbbdebug = true;
 				// block
 				var brsp = txt.indexOf( '\uFEFF' );
 				if ( brsp > -1 ) {
-					r.moveStart( 'character', -1 * ( txt.length - brsp ) );
+					r.moveStart( 'character', ( -1 ) * ( txt.length - brsp ) );
 					r.select();
 				}
 				this.lastRange = false;
@@ -1776,7 +1760,7 @@ var wbbdebug = true;
 			else if ( cmd === 'insertHTML' ) { // fix webkit bug with insertHTML
 				var sel = this.getSelection();
 				var e = this.elFromString( param );
-				var rng = this.lastRange ? this.lastRange : this.getRange();
+				var rng = ( this.lastRange ) ? this.lastRange : this.getRange();
 				rng.deleteContents();
 				rng.insertNode( e );
 				rng.collapse( false );
@@ -1788,7 +1772,7 @@ var wbbdebug = true;
 					param = false;
 				}
 				if ( this.lastRange ) {
-					if ( wbbdebug ) $.log( 'Last range select' );
+					log( 'Last range select' );
 					this.selectLastRange();
 				}
 				document.execCommand( cmd, false, param );
@@ -1796,11 +1780,11 @@ var wbbdebug = true;
 
 		},
 		getCodeByCommand : function ( command, paramobj ) {
-			return this.options.bbmode ? this.getBBCodeByCommand( command, paramobj ) : this.getHTMLByCommand( command, paramobj );
+			return ( this.options.bbmode ) ? this.getBBCodeByCommand( command, paramobj ) : this.getHTMLByCommand( command, paramobj );
 		},
 		getBBCodeByCommand : function ( command, params ) {
 			if ( !this.options.allButtons[ command ] ) { return ''; }
-			if ( typeof params === 'undefined' ) {
+			if ( typeof ( params ) === 'undefined' ) {
 				params = { };
 			}
 			params = this.keysToLower( params );
@@ -1817,12 +1801,12 @@ var wbbdebug = true;
 					if ( vrgx ) {
 						vrgxp = new RegExp( vrgx + '+', 'i' );
 					}
-					if ( typeof params[ p.toLowerCase() ] !== 'undefined' && params[ p.toLowerCase() ].toString().match( vrgxp ) === null ) {
+					if ( typeof ( params[ p.toLowerCase() ] ) !== 'undefined' && params[ p.toLowerCase() ].toString().match( vrgxp ) === null ) {
 						// not valid value
 						return '';
 					}
 				}
-				return typeof params[ p.toLowerCase() ] === 'undefined' ? '' : params[ p.toLowerCase() ];
+				return ( typeof ( params[ p.toLowerCase() ] ) === 'undefined' ) ? '' : params[ p.toLowerCase() ];
 			} );
 
 			// insert first with max params
@@ -1835,24 +1819,24 @@ var wbbdebug = true;
 				tr = this.sortArray( tr, -1 );
 				$.each( tr, function ( i, v ) {
 					var valid = true, pcount = 0, pname = { };
-
+					;
 					v = v.replace( /\{(.*?)(\[.*?\])*\}/g, function ( str, p, vrgx ) {
 						var vrgxp;
 						p = p.toLowerCase();
 						if ( vrgx ) {
 							vrgxp = new RegExp( vrgx + '+', 'i' );
 						}
-						if ( typeof params[ p.toLowerCase() ] === 'undefined' || vrgx && params[ p.toLowerCase() ].toString().match( vrgxp ) === null ) {
+						if ( typeof ( params[ p.toLowerCase() ] ) === 'undefined' || ( vrgx && params[ p.toLowerCase() ].toString().match( vrgxp ) === null ) ) {
 							valid = false;
 						}
-
-						if ( typeof params[ p ] !== 'undefined' && !pname[ p ] ) {
+						;
+						if ( typeof ( params[ p ] ) !== 'undefined' && !pname[ p ] ) {
 							pname[ p ] = 1;
 							pcount++;
 						}
-						return typeof params[ p.toLowerCase() ] === 'undefined' ? '' : params[ p.toLowerCase() ];
+						return ( typeof ( params[ p.toLowerCase() ] ) === 'undefined' ) ? '' : params[ p.toLowerCase() ];
 					} );
-					if ( valid && pcount > maxpcount ) {
+					if ( valid && ( pcount > maxpcount ) ) {
 						rbbcode = v;
 						maxpcount = pcount;
 					}
@@ -1863,13 +1847,13 @@ var wbbdebug = true;
 		getHTMLByCommand : function ( command, params ) {
 			if ( !this.options.allButtons[ command ] ) { return ''; }
 			params = this.keysToLower( params );
-			if ( typeof params === 'undefined' ) {
+			if ( typeof ( params ) === 'undefined' ) {
 				params = { };
 			}
 			if ( !params[ 'seltext' ] ) {
 				// get selected text
 				params[ 'seltext' ] = this.getSelectText( false );
-				// $.log("seltext: '"+params["seltext"]+"'");
+				// log("seltext: '"+params["seltext"]+"'");
 				if ( params[ 'seltext' ] === '' ) {
 					params[ 'seltext' ] = '\uFEFF';
 				}
@@ -1886,7 +1870,7 @@ var wbbdebug = true;
 			}
 
 			var postsel = '';
-			this.seltextID = 'wbbid_' + this.lastid++;
+			this.seltextID = 'wbbid_' + ( ++this.lastid );
 			if ( command !== 'link' && command !== 'img' ) {
 				params[ 'seltext' ] = '<span id="' + this.seltextID + '">' + params[ 'seltext' ] + '</span>'; // use
 				// for
@@ -1900,12 +1884,12 @@ var wbbdebug = true;
 			html = html.replace( /\{(.*?)(\[.*?\])*\}/g, function ( str, p, vrgx ) {
 				if ( vrgx ) {
 					var vrgxp = new RegExp( vrgx + '+', 'i' );
-					if ( typeof params[ p.toLowerCase() ] !== 'undefined' && params[ p.toLowerCase() ].toString().match( vrgxp ) === null ) {
+					if ( typeof ( params[ p.toLowerCase() ] ) !== 'undefined' && params[ p.toLowerCase() ].toString().match( vrgxp ) === null ) {
 						// not valid value
 						return '';
 					}
 				}
-				return typeof params[ p.toLowerCase() ] === 'undefined' ? '' : params[ p.toLowerCase() ];
+				return ( typeof ( params[ p.toLowerCase() ] ) === 'undefined' ) ? '' : params[ p.toLowerCase() ];
 			} );
 
 			// insert first with max params
@@ -1924,17 +1908,17 @@ var wbbdebug = true;
 						if ( vrgx ) {
 							vrgxp = new RegExp( vrgx + '+', 'i' );
 						}
-						if ( typeof params[ p ] === 'undefined' || vrgx && params[ p ].toString().match( vrgxp ) === null ) {
+						if ( typeof ( params[ p ] ) === 'undefined' || ( vrgx && params[ p ].toString().match( vrgxp ) === null ) ) {
 							valid = false;
 						}
-
-						if ( typeof params[ p ] !== 'undefined' && !pname[ p ] ) {
+						;
+						if ( typeof ( params[ p ] ) !== 'undefined' && !pname[ p ] ) {
 							pname[ p ] = 1;
 							pcount++;
 						}
-						return typeof params[ p ] === 'undefined' ? '' : params[ p ];
+						return ( typeof ( params[ p ] ) === 'undefined' ) ? '' : params[ p ];
 					} );
-					if ( valid && pcount > maxpcount ) {
+					if ( valid && ( pcount > maxpcount ) ) {
 						rhtml = v;
 						maxpcount = pcount;
 					}
@@ -1948,7 +1932,7 @@ var wbbdebug = true;
 			if ( window.getSelection ) {
 				return window.getSelection();
 			}
-			else if ( document.selection ) { return this.options.bbmode ? document.selection.createRange() : document.selection.createRange(); }
+			else if ( document.selection ) { return ( this.options.bbmode ) ? document.selection.createRange() : document.selection.createRange(); }
 		},
 		getSelectText : function ( fromTxtArea, range ) {
 			if ( fromTxtArea ) {
@@ -1970,7 +1954,7 @@ var wbbdebug = true;
 				if ( !range ) {
 					range = this.getRange();
 				}
-
+				;
 				if ( window.getSelection ) {
 					// w3c
 					if ( range ) { return $( '<div>' ).append( range.cloneContents() ).html(); }
@@ -1989,29 +1973,29 @@ var wbbdebug = true;
 					return sel.getRangeAt( 0 );
 				}
 				else if ( sel.anchorNode ) {
-					var range = this.options.bbmode ? document.createRange() : document.createRange();
+					var range = ( this.options.bbmode ) ? document.createRange() : document.createRange();
 					range.setStart( sel.anchorNode, sel.anchorOffset );
 					range.setEnd( sel.focusNode, sel.focusOffset );
 					return range;
 				}
 			}
 			else {
-				return this.options.bbmode === true ? document.selection.createRange() : document.selection.createRange();
+				return ( this.options.bbmode === true ) ? document.selection.createRange() : document.selection.createRange();
 			}
 		},
 		insertAtCursor : function ( code, forceBBMode ) {
-			if ( typeof code !== 'string' ) {
+			if ( typeof ( code ) !== 'string' ) {
 				code = $( '<div>' ).append( code ).html();
 			}
-			if ( this.options.bbmode && typeof forceBBMode === 'undefined' || forceBBMode === true ) {
+			if ( ( this.options.bbmode && typeof ( forceBBMode ) === 'undefined' ) || forceBBMode === true ) {
 				var clbb = code.replace( /.*(\[\/\S+?\])$/, '$1' );
-				var p = this.getCursorPosBB() + ( code.indexOf( clbb ) !== -1 && code.match( /\[.*\]/ ) ? code.indexOf( clbb ) : code.length );
+				var p = this.getCursorPosBB() + ( ( code.indexOf( clbb ) !== -1 && code.match( /\[.*\]/ ) ) ? code.indexOf( clbb ) : code.length );
 				if ( document.selection ) {
 					// IE
 					this.txtArea.focus();
 					this.getSelection().text = code;
 				}
-				else if ( this.txtArea.selectionStart || this.txtArea.selectionStart === 0 ) {
+				else if ( this.txtArea.selectionStart || this.txtArea.selectionStart === '0' ) {
 					this.txtArea.value = this.txtArea.value.substring( 0, this.txtArea.selectionStart ) + code + this.txtArea.value
 							.substring( this.txtArea.selectionEnd, this.txtArea.value.length );
 				}
@@ -2036,7 +2020,7 @@ var wbbdebug = true;
 			if ( !rng ) { return this.$body; }
 			// return (window.getSelection) ?
 			// rng.commonAncestorContainer:rng.parentElement();
-			var sn = window.getSelection ? rng.commonAncestorContainer : rng.parentElement();
+			var sn = ( window.getSelection ) ? rng.commonAncestorContainer : rng.parentElement();
 			if ( $( sn ).is( '.imgWrap' ) ) {
 				sn = $( sn ).children( 'img' )[ 0 ];
 			}
@@ -2126,7 +2110,7 @@ var wbbdebug = true;
 			}
 		},
 		setBodyFocus : function ( ) {
-			if ( wbbdebug ) $.log( 'Set focus to WysiBB editor' );
+			log( 'Set focus to WysiBB editor' );
 			if ( this.options.bbmode ) {
 				if ( !this.$txtArea.is( ':focus' ) ) {
 					this.$txtArea.focus();
@@ -2152,15 +2136,15 @@ var wbbdebug = true;
 				var v = $n.attr( item );
 				var va;
 				/*
-				 * $.log("v: "+v); if ($.inArray(item,this.options.attrWrap)!=-1) { item =
+				 * log("v: "+v); if ($.inArray(item,this.options.attrWrap)!=-1) { item =
 				 * '_'+item; }
 				 */
-				// $.log(item);
+				// log(item);
 				if ( item.substr( 0, 1 ) === '_' ) {
 					item = item.substr( 1, item.length );
 				}
 				if ( v && !v.match( /\{.*?\}/ ) ) {
-					// $.log("I1: "+item);
+					// log('I1: '+item);
 					if ( item === 'style' ) {
 						v = $n.attr( item );
 						va = v.split( ';' );
@@ -2175,7 +2159,7 @@ var wbbdebug = true;
 					}
 				}
 				else if ( v && item === 'style' ) {
-					// $.log("I2: "+item);
+					// log('I2: '+item);
 					var vf = v.substr( 0, v.indexOf( '{' ) );
 					if ( vf && vf !== '' ) {
 						v = v.substr( 0, v.indexOf( '{' ) );
@@ -2187,7 +2171,7 @@ var wbbdebug = true;
 					}
 				}
 				else { // 1.2.2
-					// $.log("I3: "+item);
+					// log('I3: '+item);
 					filter += '[' + item + ']';
 				}
 			}, this ) );
@@ -2215,7 +2199,7 @@ var wbbdebug = true;
 		getRegexpReplace : function ( str, validname ) {
 			str = str.replace( /(\(|\)|\[|\]|\.|\*|\?|\:|\\)/g, '\\$1' ).replace( /\s+/g, '\\s+' ).replace( validname.replace( /(\(|\)|\[|\]|\.|\*|\?|\:|\\)/g, '\\$1' ), '(.+)' )
 					.replace( /\{\S+?\}/g, '.*' );
-			return str;
+			return ( str );
 		},
 		getBBCode : function ( ) {
 			if ( !this.options.rules ) { return this.$txtArea.val(); }
@@ -2226,8 +2210,8 @@ var wbbdebug = true;
 		},
 		toBB : function ( data ) {
 			if ( !data ) { return ''; }
-
-			var $e = typeof data === 'string' ? $( '<span>' ).html( data ) : $( data );
+			;
+			var $e = ( typeof ( data ) === 'string' ) ? $( '<span>' ).html( data ) : $( data );
 			// remove last BR
 			$e.find( 'div,blockquote,p' ).each( function ( ) {
 				if ( this.nodeType !== 3 && this.lastChild && this.lastChild.tagName === 'BR' ) {
@@ -2274,19 +2258,19 @@ var wbbdebug = true;
 								}
 								bbcode = bbcode.replace( /\{(.*?)(\[.*?\])*\}/g, $.proxy( function ( str, s, vrgx ) {
 									var c = crules[ s.toLowerCase() ];
-									// if (typeof(c)=="undefined") {$.log("Param: {"+s+"} not
+									// if (typeof(c)=='undefined') {log("Param: {"+s+"} not
 									// found in HTML representation.");skip=true;return s;}
-									if ( typeof c === 'undefined' ) {
-										if ( wbbdebug ) $.log( 'Param: {' + s + '} not found in HTML representation.' );
+									if ( typeof ( c ) === 'undefined' ) {
+										log( 'Param: {' + s + '} not found in HTML representation.' );
 										skip = true;
 									}
-									var $cel = c.sel ? $( el ).find( c.sel ) : $( el );
+									var $cel = ( c.sel ) ? $( el ).find( c.sel ) : $( el );
 									if ( c.attr && !$cel.attr( c.attr ) ) {
 										skip = true;
 										return s;
 									} // skip if needed attribute not present, maybe other bbcode
-									var cont = c.attr ? $cel.attr( c.attr ) : $cel.html();
-									if ( typeof cont === 'undefined' || cont == null ) {
+									var cont = ( c.attr ) ? $cel.attr( c.attr ) : $cel.html();
+									if ( typeof ( cont ) === 'undefined' || cont === null ) {
 										skip = true;
 										return s;
 									}
@@ -2300,7 +2284,7 @@ var wbbdebug = true;
 										cont += ';';
 									}
 									// prepare regexp
-									var rgx = regexp ? new RegExp( regexp, '' ) : false;
+									var rgx = ( regexp ) ? new RegExp( regexp, '' ) : false;
 									if ( rgx ) {
 										if ( cont.match( rgx ) ) {
 											var m = cont.match( rgx );
@@ -2391,7 +2375,7 @@ var wbbdebug = true;
 			return outbb;
 		},
 		getHTML : function ( bbdata, init, skiplt ) {
-			if ( !this.options.bbmode && !init ) return this.$body.html();
+			if ( !this.options.bbmode && !init ) { return this.$body.html(); }
 
 			if ( !skiplt ) {
 				bbdata = bbdata.replace( /</g, '&lt;' ).replace( /\{/g, '&#123;' ).replace( /\}/g, '&#125;' );
@@ -2410,7 +2394,7 @@ var wbbdebug = true;
 						html = html.replace( /\n/g, '' ); // IE 7,8 FIX
 						var a = [ ];
 						bb = bb.replace( /(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g, '\\$1' );
-						// .replace(/\s/g,"\\s");
+						// .replace(/\s/g,'\\s');
 						bb = bb.replace( /\{(.*?)(\\\[.*?\\\])*\}/gi, $.proxy( function ( str, s, vrgx ) {
 							a.push( s );
 							if ( vrgx ) {
@@ -2421,7 +2405,7 @@ var wbbdebug = true;
 							return '([\\s\\S]*?)';
 						}, this ) );
 						var n = 0, am;
-						while ( ( am = ( new RegExp( bb, 'mgi' ) ).exec( bbdata ) ) !== null ) {
+						while ( ( am = ( new RegExp( bb, 'mgi' ) ).exec( bbdata ) ) != null ) {
 							if ( am ) {
 								var r = { };
 								$.each( a, $.proxy( function ( i, k ) {
@@ -2447,7 +2431,7 @@ var wbbdebug = true;
 			// transform smiles
 			/*
 			 * $wrap.contents().filter(function() {return
-			 * this.nodeType==3}).each($.proxy(smilerpl,this)).end().find("*").contents().filter(function()
+			 * this.nodeType==3}).each($.proxy(smilerpl,this)).end().find('*').contents().filter(function()
 			 * {return this.nodeType==3}).each($.proxy(smilerpl,this));
 			 * 
 			 * function smilerpl(i,el) { var ndata = el.data;
@@ -2465,29 +2449,39 @@ var wbbdebug = true;
 
 			return $wrap.html();
 		},
+		// NOTE: changed getHTMLSmiles and smileRPL based on
+		// https://github.com/wbb/wysibb/pull/58/files
 		getHTMLSmiles : function ( rel ) {
 			$( rel ).contents().filter( function ( ) {
-				return this.nodeType === 3;
+				return this.nodeType === 3 || this.nodeType === 1;
 			} ).each( $.proxy( this.smileRPL, this ) );
 		},
 		smileRPL : function ( i, el ) {
-			var ndata = el.data;
-			$.each( this.options.smileList, $.proxy( function ( i, row ) {
-				var fidx = ndata.indexOf( row.bbcode );
-				if ( fidx !== -1 ) {
-					var afternode_txt = ndata.substring( fidx + row.bbcode.length, ndata.length );
-					var afternode = document.createTextNode( afternode_txt );
-					el.data = ndata = el.data.substr( 0, fidx );
-					$( el ).after( afternode ).after( this.strf( row.img, this.options ) );
-					this.getHTMLSmiles( el.parentNode );
-					return false;
-				}
-				this.getHTMLSmiles( el );
-			}, this ) );
+			if ( el.nodeType === 1 ) {
+				// recursive edit
+				$( el ).contents().filter( function ( ) {
+					return this.nodeType === 3 || this.nodeType === 1;
+				} ).each( $.proxy( this.smileRPL, this ) );
+			}
+			else {
+				var ndata = el.data;
+				$.each( this.options.smileList, $.proxy( function ( i, row ) {
+					var fidx = ndata.indexOf( row.bbcode );
+					if ( fidx !== -1 ) {
+						var afternode_txt = ndata.substring( fidx + row.bbcode.length, ndata.length );
+						var afternode = document.createTextNode( afternode_txt );
+						el.data = ndata = el.data.substr( 0, fidx );
+						$( el ).after( afternode ).after( this.strf( row.img, this.options ) );
+						this.getHTMLSmiles( el.parentNode );
+						return false;
+					}
+					this.getHTMLSmiles( el );
+				}, this ) );
+			}
 		},
 		// UTILS
 		setUID : function ( el, attr ) {
-			var id = 'wbbid_' + this.lastid++;
+			var id = 'wbbid_' + ( ++this.lastid );
 			if ( el ) {
 				$( el ).attr( attr || 'id', id );
 			}
@@ -2510,7 +2504,7 @@ var wbbdebug = true;
 				$.each( keys, function ( ) {
 					value = value[ this ];
 				} );
-				return value === null || value === undefined ? '' : value;
+				return ( value === null || value === undefined ) ? '' : value;
 			} );
 		},
 		elFromString : function ( str ) {
@@ -2519,7 +2513,7 @@ var wbbdebug = true;
 				var wr = document.createElement( 'SPAN' );
 				$( wr ).html( str );
 				this.setUID( wr, 'wbb' );
-				return $( wr ).contents().size() > 1 ? wr : wr.firstChild;
+				return ( $( wr ).contents().size() > 1 ) ? wr : wr.firstChild;
 			}
 			else {
 				// create text node
@@ -2528,8 +2522,8 @@ var wbbdebug = true;
 		},
 		isContain : function ( node, sel ) {
 			while ( node && !$( node ).hasClass( 'wysibb' ) ) {
-				if ( $( node ).is( sel ) ) return node;
-
+				if ( $( node ).is( sel ) ) { return node; }
+				;
 				if ( node ) {
 					node = node.parentNode;
 				}
@@ -2541,13 +2535,13 @@ var wbbdebug = true;
 		isBBContain : function ( bbcode ) {
 			var pos = this.getCursorPosBB();
 			var b = this.prepareRGX( bbcode );
-			var bbrgx = new RegExp( b, '' );
+			var bbrgx = new RegExp( b, 'g' );
 			var a;
 			var lastindex = 0;
 			while ( ( a = bbrgx.exec( this.txtArea.value ) ) != null ) {
 				var p = this.txtArea.value.indexOf( a[ 0 ], lastindex );
-				if ( pos > p && pos < p + a[ 0 ].length ) { return [
-						a, p,
+				if ( pos > p && pos < ( p + a[ 0 ].length ) ) { return [
+						a, p
 				]; }
 				lastindex = p + 1;
 			}
@@ -2555,11 +2549,10 @@ var wbbdebug = true;
 		prepareRGX : function ( r ) {
 			return r.replace( /(\[|\]|\)|\(|\.|\*|\?|\:|\||\\)/g, '\\$1' ).replace( /\{.*?\}/g, '([\\s\\S]*?)' );
 			// return
-			// r.replace(/([^a-z0-9)/ig,"\\$1").replace(/\{.*?\}/g,"([\\s\\S]*?)");
+			// r.replace(/([^a-z0-9)/ig,'\\$1').replace(/\{.*?\}/g,'([\\s\\S]*?)');
 		},
 		checkForLastBR : function ( node ) {
 			var $node;
-
 			if ( !node ) {
 				$node = this.body;
 			}
@@ -2572,12 +2565,12 @@ var wbbdebug = true;
 			}
 			if ( this.options.bbmode === false && $node.is( 'div,blockquote,code' ) && $node.contents().size() > 0 ) {
 				var l = $node[ 0 ].lastChild;
-				if ( !l || l && l.tagName !== 'BR' ) {
-					$node.append( '<br>' );
+				if ( !l || ( l && l.tagName !== 'BR' ) ) {
+					$node.append( '<br/>' );
 				}
 			}
 			if ( this.$body.contents().size() > 0 && this.body.lastChild.tagName !== 'BR' ) {
-				this.$body.append( '<br>' );
+				this.$body.append( '<br/>' );
 			}
 		},
 		getAttributeList : function ( el ) {
@@ -2594,7 +2587,7 @@ var wbbdebug = true;
 				var $wr = $( '<div>' ).html( html );
 				$.each( this.options.allButtons[ cmd ].rootSelector, $.proxy( function ( i, s ) {
 					var seltext = false;
-					if ( typeof this.options.rules[ s ][ 0 ][ 1 ][ 'seltext' ] !== 'undefined' ) {
+					if ( typeof ( this.options.rules[ s ][ 0 ][ 1 ][ 'seltext' ] ) !== 'undefined' ) {
 						seltext = this.options.rules[ s ][ 0 ][ 1 ][ 'seltext' ][ 'sel' ];
 					}
 					var res = true;
@@ -2621,7 +2614,7 @@ var wbbdebug = true;
 			if ( node.nodeType === 3 ) {
 				node = node.parentNode;
 			}
-
+			;
 			var f = this.filterByNode( node ).replace( /\:eq.*$/g, '' );
 			if ( $( node.nextSibling ).is( f ) ) {
 				$( node ).append( $( node.nextSibling ).html() );
@@ -2637,12 +2630,7 @@ var wbbdebug = true;
 				// to HTML
 				this.$body.html( this.getHTML( this.$txtArea.val() ) );
 				this.$txtArea.hide().removeAttr( 'wbbsync' ).val( '' );
-
-				// TODO: look into if this is needed, because otherwise it'll just keep
-				// extending the min-height everytime
-				// this.$body.css( 'min-height', this.$txtArea.height()
-				// ).show().focus();
-				this.$body.show().focus();
+				this.$body.css( 'min-height', this.$txtArea.height() ).show().focus();
 			}
 			else {
 				// to bbcode
@@ -2655,20 +2643,23 @@ var wbbdebug = true;
 		clearEmpty : function ( ) {
 			this.$body.children().filter( emptyFilter ).remove();
 			function emptyFilter ( ) {
-				if ( !$( this ).is( 'span,strong,a,b,i,u,s' ) ) { return false; }
+				if ( !$( this ).is( 'span,font,a,b,i,u,s' ) ) {
+					// clear empty only for span,font
+					return false;
+				}
 				if ( !$( this ).hasClass( 'wbbtab' ) && $.trim( $( this ).html() ).length === 0 ) {
 					return true;
 				}
 				else if ( $( this ).children().size() > 0 ) {
 					$( this ).children().filter( emptyFilter ).remove();
-					if ( $( this ).html().length === 0 && this.tagName !== 'BODY' ) return true;
+					if ( $( this ).html().length === 0 && this.tagName !== 'BODY' ) { return true; }
 				}
 			}
 		},
 		dropdownclick : function ( bsel, tsel, e ) {
 			// this.body.focus();
-			var $btn = $( e.currentTarget.parentNode ).closest( bsel );
-			if ( $btn.hasClass( 'disabled' ) ) { return; }
+			var $btn = $( e.currentTarget ).closest( bsel );
+			if ( $btn.hasClass( 'dis' ) ) { return; }
 			if ( $btn.attr( 'wbbshow' ) ) {
 				// hide dropdown
 				$btn.removeAttr( 'wbbshow' );
@@ -2682,7 +2673,7 @@ var wbbdebug = true;
 			else {
 				this.saveRange();
 				this.$editor.find( '*[wbbshow]' ).each( function ( i, el ) {
-					$( el.parentNode ).removeClass( 'active' ).find( $( el ).attr( 'wbbshow' ) ).hide().end().removeAttr( 'wbbshow' );
+					$( el ).removeClass( 'on' ).find( $( el ).attr( 'wbbshow' ) ).hide().end().removeAttr( 'wbbshow' );
 				} );
 				$btn.attr( 'wbbshow', tsel );
 				$( document.body ).bind( 'mousedown', $.proxy( function ( evt ) {
@@ -2695,11 +2686,11 @@ var wbbdebug = true;
 				}
 			}
 			$btn.find( tsel ).toggle();
-			$btn.toggleClass( 'active' );
+			$btn.toggleClass( 'on' );
 		},
 		dropdownhandler : function ( $btn, bsel, tsel, e ) {
 			if ( $( e.target ).parents( bsel ).size() === 0 ) {
-				$btn.removeClass( 'active' ).find( tsel ).hide();
+				$btn.removeClass( 'on' ).find( tsel ).hide();
 				$( document ).unbind( 'mousedown', this.dropdownhandler );
 				if ( this.$body ) {
 					this.$body.unbind( 'mousedown', this.dropdownhandler );
@@ -2708,11 +2699,11 @@ var wbbdebug = true;
 		},
 		rgbToHex : function ( rgb ) {
 			if ( rgb.substr( 0, 1 ) === '#' ) { return rgb; }
-			// if (rgb.indexOf("rgb")==-1) {return rgb;}
+			// if (rgb.indexOf('rgb')==-1) {return rgb;}
 			if ( rgb.indexOf( 'rgb' ) === -1 ) {
 				// IE
 				var color = parseInt( rgb );
-				color = color & 0x0000ff << 16 | color & 0x00ff00 | color & 0xff0000 >>> 16;
+				color = ( ( color & 0x0000ff ) << 16 ) | ( color & 0x00ff00 ) | ( ( color & 0xff0000 ) >>> 16 );
 				return '#' + color.toString( 16 );
 			}
 			var digits = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec( rgb );
@@ -2751,14 +2742,14 @@ var wbbdebug = true;
 			$block.find( '*[wbbkeep!="1"]' ).each( $.proxy( function ( i, el ) {
 				var $this = $( el );
 				if ( $this.is( 'div,p' ) && ( $this.children().size() === 0 || el.lastChild.tagName !== 'BR' ) ) {
-					$this.after( '<br>' );
+					$this.after( '<br/>' );
 				}
 			}, this ) );
 			$block.find( '*[wbbkeep]' ).removeAttr( 'wbbkeep' ).removeAttr( 'style' );
-			$.log( $block.html() );
-			// $.log("BBCODE: "+this.toBB($block.clone(true)));
+			log( $block.html() );
+			// log("BBCODE: "+this.toBB($block.clone(true)));
 			$block.html( this.getHTML( this.toBB( $block ), true ) );
-			$.log( $block.html() );
+			log( $block.html() );
 
 			// OLD
 			/*
@@ -2789,18 +2780,18 @@ var wbbdebug = true;
 						this.options.smileList.push( {
 							title : $el.attr( 'title' ),
 							bbcode : $el.attr( 'alt' ),
-							img : $el.removeAttr( 'alt' ).removeAttr( 'title' )[ 0 ].outerHTML,
+							img : $el.removeAttr( 'alt' ).removeAttr( 'title' )[ 0 ].outerHTML
 						} );
 					}, this ) );
 				}
 			}
 		},
 		destroy : function ( ) {
+			this.$txtArea.val( this.getBBCode() );
 			this.$editor.replaceWith( this.$txtArea );
 			this.$txtArea.removeClass( 'wysibb-texarea' ).show();
 			this.$modal.remove();
 			this.$txtArea.data( 'wbb', null );
-			this.$txtArea.value = this.$txtArea.innerHTML;
 		},
 		pressTab : function ( e ) {
 			if ( e && e.which === 9 ) {
@@ -2813,7 +2804,7 @@ var wbbdebug = true;
 				}
 				else {
 					this.insertAtCursor( '<span class="wbbtab">\uFEFF</span>', false );
-					// this.execNativeCommand("indent",false);
+					// this.execNativeCommand('indent',false);
 				}
 			}
 		},
@@ -2842,7 +2833,7 @@ var wbbdebug = true;
 			}
 		},
 		txtAreaInitContent : function ( ) {
-			// $.log(this.txtArea.value);
+			// log(this.txtArea.value);
 			this.$body.html( this.getHTML( this.txtArea.value, true ) );
 		},
 		getValidationRGX : function ( s ) {
@@ -2899,10 +2890,10 @@ var wbbdebug = true;
 		},
 		disNonActiveButtons : function ( ) {
 			if ( this.isInClearTextBlock() ) {
-				this.$toolbar.find( '.wysibb-button:not(.active,.mswitch)' ).addClass( 'disabled' );
+				this.$toolbar.find( '.wysibb-toolbar-btn:not(.on,.mswitch)' ).addClass( 'dis' );
 			}
 			else {
-				this.$toolbar.find( '.wysibb-button.disabled' ).removeClass( 'disabled' );
+				this.$toolbar.find( '.wysibb-toolbar-btn.dis' ).removeClass( 'dis' );
 			}
 		},
 		setCursorByEl : function ( el ) {
@@ -2919,7 +2910,7 @@ var wbbdebug = true;
 			var $e = $( e.target );
 			if ( this.hasWrapedImage && ( $e.closest( '.wbb-img,#wbbmodal' ).size() === 0 || $e.hasClass( 'wbb-cancel-button' ) ) ) {
 				this.$body.find( '.imgWrap ' ).each( function ( ) {
-					$.log( 'Removed imgWrap block' );
+					log( 'Removed imgWrap block' );
 					$( this ).replaceWith( $( this ).find( 'img' ) );
 				} );
 				this.hasWrapedImage = false;
@@ -2936,7 +2927,7 @@ var wbbdebug = true;
 
 		// MODAL WINDOW
 		showModal : function ( cmd, opt, queryState ) {
-			if ( wbbdebug ) $.log( 'showModal: ' + cmd );
+			log( 'showModal: ' + cmd );
 			this.saveRange();
 			var $cont = this.$modal.find( '.wbbm-content' ).html( '' );
 			var $wbbm = this.$modal.find( '.wbbm' ).removeClass( 'hastabs' );
@@ -2949,11 +2940,11 @@ var wbbdebug = true;
 						.each( opt.tabs, $
 								.proxy( function ( i, row ) {
 									if ( i === 0 ) {
-										row[ 'active' ] = 'active';
+										row[ 'on' ] = 'on';
 									}
 									$ul
 											.append( this
-													.strf( '<li class="{active}" onClick="$(this).parent().find(\'.active\').removeClass(\'active\');$(this).addClass(\'active\');$(this).parents(\'.wbbm-content\').find(\'.tab-cont\').hide();$(this).parents(\'.wbbm-content\').find(\'.tab' + i + '\').show()">{title}</li>', row ) );
+													.strf( '<li class="{on}" onClick="$(this).parent().find(\'.on\').removeClass(\'on\');$(this).addClass(\'on\');$(this).parents(\'.wbbm-content\').find(\'.tab-cont\').hide();$(this).parents(\'.wbbm-content\').find(\'.tab' + i + '\').show()">{title}</li>', row ) );
 
 								}, this ) );
 			}
@@ -3011,7 +3002,7 @@ var wbbdebug = true;
 				opt.onLoad.call( this, cmd, opt, queryState );
 			}
 
-			$wbbm.find( '#wbbm-submit' ).on( 'click', $.proxy( function ( ) {
+			$wbbm.find( '#wbbm-submit' ).click( $.proxy( function ( ) {
 
 				if ( $.isFunction( opt.onSubmit ) ) { // custom submit function, if
 					// return false, then don't
@@ -3023,8 +3014,8 @@ var wbbdebug = true;
 				var valid = true;
 				this.$modal.find( '.wbbm-inperr' ).remove();
 				this.$modal.find( '.wbbm-brdred' ).removeClass( 'wbbm-brdred' );
-				// $.each(this.$modal.find('.tab-cont:visible
-				// input'),$.proxy(function(i,el) {
+				// $.each(this.$modal.find(".tab-cont:visible
+				// input"),$.proxy(function(i,el) {
 				$.each( this.$modal.find( '.tab-cont:visible .inp-text' ), $.proxy( function ( i, el ) {
 					var tid = $( el ).parents( '.tab-cont' ).attr( 'tid' );
 					var pname = $( el ).attr( 'name' ).toLowerCase();
@@ -3036,7 +3027,7 @@ var wbbdebug = true;
 						pval = $( el ).html();
 					}
 					var validation = opt.tabs[ tid ][ 'input' ][ i ][ 'validation' ];
-					if ( typeof validation !== 'undefined' ) {
+					if ( typeof ( validation ) !== 'undefined' ) {
 						if ( !pval.match( new RegExp( validation, 'i' ) ) ) {
 							valid = false;
 							$( el ).after( '<span class="wbbm-inperr">' + CURLANG.validation_err + '</span>' ).addClass( 'wbbm-brdred' );
@@ -3045,7 +3036,7 @@ var wbbdebug = true;
 					params[ pname ] = pval;
 				}, this ) );
 				if ( valid ) {
-					if ( wbbdebug ) $.log( 'Last range: ' + this.lastRange );
+					log( 'Last range: ' + this.lastRange );
 					this.selectLastRange();
 					// insert callback
 					if ( queryState ) {
@@ -3058,7 +3049,7 @@ var wbbdebug = true;
 					this.updateUI();
 				}
 			}, this ) );
-			$wbbm.find( '#wbbm-remove' ).on( 'click', $.proxy( function ( ) {
+			$wbbm.find( '#wbbm-remove' ).click( $.proxy( function ( ) {
 				// clbk.remove();
 				this.selectLastRange();
 				this.wbbRemoveCallback( cmd ); // remove callback
@@ -3125,7 +3116,7 @@ var wbbdebug = true;
 				var rules = this.options.rules[ s ][ 0 ][ 1 ];
 				$.each( rules, $.proxy( function ( k, v ) {
 					var value = '';
-					var $v = v.sel !== false ? value = $( src ).find( v.sel ) : $( src );
+					var $v = ( v.sel !== false ) ? value = $( src ).find( v.sel ) : $( src );
 					if ( v.attr !== false ) {
 						value = $v.attr( v.attr );
 					}
@@ -3148,13 +3139,13 @@ var wbbdebug = true;
 
 		// imgUploader
 		imgLoadModal : function ( ) {
-			if ( wbbdebug ) $.log( 'imgLoadModal' );
+			log( 'imgLoadModal' );
 			if ( this.options.imgupload === true ) {
 				this.$modal.find( '#imguploader' ).dragfileupload( {
 					url : this.strf( this.options.img_uploadurl, this.options ),
 					extraParams : {
 						maxwidth : this.options.img_maxwidth,
-						maxheight : this.options.img_maxheight,
+						maxheight : this.options.img_maxheight
 					},
 					themePrefix : this.options.themePrefix,
 					themeName : this.options.themeName,
@@ -3163,7 +3154,7 @@ var wbbdebug = true;
 
 						this.closeModal();
 						this.updateUI();
-					}, this ),
+					}, this )
 				} );
 
 				this.$modal.find( '#fileupl' ).bind( 'change', function ( ) {
@@ -3179,7 +3170,6 @@ var wbbdebug = true;
 											.after( '<div class="loader"><img src="' + this.options.themePrefix + '/' + this.options.themeName + '/img/loader.gif" /><br/><span>' + CURLANG.loading + '</span></div>' )
 											.parent().css( 'text-align', 'center' );
 								}, this ) );
-
 			}
 			else {
 				this.$modal.find( '.hastabs' ).removeClass( 'hastabs' );
@@ -3188,25 +3178,26 @@ var wbbdebug = true;
 			}
 		},
 		imgSubmitModal : function ( ) {
-			$.log( 'imgSubmitModal' );
+			log( 'imgSubmitModal' );
 		},
 		// DEBUG
 		printObjectInIE : function ( obj ) {
 			try {
-				$.log( JSON.stringify( obj ) );
+				log( JSON.stringify( obj ) );
 			}
 			catch ( e ) {
-				if ( wbbdebug ) $.log( e );
+				//
 			}
 		},
 		checkFilter : function ( node, filter ) {
-			$.log( 'node: ' + $( node ).get( 0 ).outerHTML + ' filter: ' + filter + ' res: ' + $( node ).is( filter.toLowerCase() ) );
+			log( 'node: ' + $( node ).get( 0 ).outerHTML + ' filter: ' + filter + ' res: ' + $( node ).is( filter.toLowerCase() ) );
 		},
 		debug : function ( msg ) {
 			if ( this.options.debug === true ) {
+				// TODO: change this to use the 'performance' object
 				var time = ( new Date() ).getTime();
-				if ( typeof console !== 'undefined' ) {
-					console.log( time - this.startTime + ' ms: ' + msg );
+				if ( typeof ( console ) !== 'undefined' ) {
+					console.log( ( time - this.startTime ) + ' ms: ' + msg );
 				}
 				else {
 					$( '#exlog' ).append( '<p>' + ( time - this.startTime ) + ' ms: ' + msg + '</p>' );
@@ -3217,29 +3208,30 @@ var wbbdebug = true;
 
 		// Browser fixes
 		isChrome : function ( ) {
-			return window.chrome ? true : false;
+			return ( window.chrome ) ? true : false;
 		},
 		fixTableTransform : function ( html ) {
-			if ( !html ) return '';
+			if ( !html ) { return ''; }
 			if ( $.inArray( 'table', this.options.buttons ) === -1 ) {
 				return html.replace( /\<(\/*?(table|tr|td|tbody))[^>]*\>/ig, '' );
 			}
 			else {
 				return html.replace( /\<(\/*?(table|tr|td))[^>]*\>/ig, '[$1]'.toLowerCase() ).replace( /\<\/*tbody[^>]*\>/ig, '' );
 			}
-		},
+		}
 	};
 
-	$.log = function ( msg ) {
-		if ( wbbdebug === true ) {
-			if ( typeof console !== 'undefined' ) {
+	function log ( msg ) {
+		if ( this.options.debug === true ) {
+			if ( typeof ( console ) !== 'undefined' ) {
 				console.log( msg );
 			}
 			else {
 				$( '#exlog' ).append( '<p>' + msg + '</p>' );
 			}
 		}
-	};
+	}
+
 	$.fn.wysibb = function ( settings ) {
 		return this.each( function ( ) {
 			var data = $( this ).data( 'wbb' );
@@ -3255,7 +3247,7 @@ var wbbdebug = true;
 		var start = {
 			x : 0,
 			y : 0,
-			height : 0,
+			height : 0
 		};
 		var drag;
 		opt.scope.drag_mousedown = function ( e ) {
@@ -3264,7 +3256,7 @@ var wbbdebug = true;
 				x : e.pageX,
 				y : e.pageY,
 				height : opt.height,
-				sheight : opt.scope.$body.height(),
+				sheight : opt.scope.$body.height()
 			};
 			drag = true;
 			$( document ).bind( 'mousemove', $.proxy( opt.scope.drag_mousemove, this ) );
@@ -3291,10 +3283,10 @@ var wbbdebug = true;
 				var nheight = start.sheight + axisY;
 				if ( nheight > start.height && nheight <= opt.scope.options.resize_maxheight ) {
 					if ( opt.scope.options.bbmode === true ) {
-						opt.scope.$txtArea.css( opt.scope.options.autoresize === true ? '' : 'height', nheight + 'px' );
+						opt.scope.$txtArea.css( ( opt.scope.options.autoresize === true ) ? 'min-height' : 'height', nheight + '' );
 					}
 					else {
-						opt.scope.$body.css( opt.scope.options.autoresize === true ? 'min-height' : 'height', nheight + 'px' );
+						opt.scope.$body.css( ( opt.scope.options.autoresize === true ) ? 'min-height' : 'height', nheight + 'px' );
 					}
 				}
 			}
@@ -3312,7 +3304,7 @@ var wbbdebug = true;
 		return this.data( 'wbb' ).getSelectText( fromTextArea );
 	};
 	$.fn.bbcode = function ( data ) {
-		if ( typeof data !== 'undefined' ) {
+		if ( typeof ( data ) !== 'undefined' ) {
 			if ( this.data( 'wbb' ).options.bbmode ) {
 				this.data( 'wbb' ).$txtArea.val( data );
 			}
@@ -3327,7 +3319,7 @@ var wbbdebug = true;
 	};
 	$.fn.htmlcode = function ( data ) {
 		if ( !this.data( 'wbb' ).options.onlyBBMode && this.data( 'wbb' ).inited === true ) {
-			if ( typeof data !== 'undefined' ) {
+			if ( typeof ( data ) !== 'undefined' ) {
 				this.data( 'wbb' ).$body.html( data );
 				return this;
 			}
@@ -3359,13 +3351,13 @@ var wbbdebug = true;
 	};
 	$.fn.insertImage = function ( imgurl, thumburl ) {
 		var editor = this.data( 'wbb' );
-		var code = thumburl ? editor.getCodeByCommand( 'link', {
+		var code = ( thumburl ) ? editor.getCodeByCommand( 'link', {
 			url : imgurl,
 			seltext : editor.getCodeByCommand( 'img', {
-				src : thumburl,
-			} ),
+				src : thumburl
+			} )
 		} ) : editor.getCodeByCommand( 'img', {
-			src : imgurl,
+			src : imgurl
 		} );
 		this.insertAtCursor( code );
 		return editor;
@@ -3381,10 +3373,10 @@ var wbbdebug = true;
 	$.fn.queryState = function ( command ) {
 		return this.data( 'wbb' ).queryState( command );
 	};
-}( jQuery );
+} )( jQuery );
 
 // Drag&Drop file uploader
-!function ( $ ) {
+( function ( $ ) {
 	'use strict';
 
 	$.fn.dragfileupload = function ( options ) {
@@ -3405,7 +3397,7 @@ var wbbdebug = true;
 			validation : '\.(jpg|png|gif|jpeg)$',
 
 			t1 : CURLANG.fileupload_text1,
-			t2 : CURLANG.fileupload_text2,
+			t2 : CURLANG.fileupload_text2
 		}, options );
 	}
 
@@ -3476,7 +3468,7 @@ var wbbdebug = true;
 								}, this ),
 								error : $.proxy( function ( xhr, txt, thr ) {
 									this.error( CURLANG.error_onupload );
-								}, this ),
+								}, this )
 							} );
 						}, this );
 
@@ -3484,6 +3476,6 @@ var wbbdebug = true;
 		},
 		error : function ( msg ) {
 			this.$block.find( '.upl-error' ).remove().end().append( '<span class="upl-error">' + msg + '</span>' ).addClass( 'wbbm-brdred' );
-		},
+		}
 	};
-}( jQuery );
+} )( jQuery );

@@ -1,0 +1,719 @@
+// Foundation
+@import 'settings/settings';
+@import 'foundation';
+
+html {height: 100% !important;}
+
+.wysibb {
+	border: 1px solid $light-gray;
+	position: relative;
+	background: $white;
+	
+	&-body {
+    overflow-x: auto;
+    
+    ul, ol {
+      padding-left: 30px;
+    }
+    
+    .imgWrap {
+      position: relative;
+      display: inline-block;
+      
+      img {
+        opacity: 0.5;
+      }
+    }
+  }
+  
+  &-toolbar {
+    @include menu-base;
+    // @include menu-simple;
+    border-bottom: 1px solid $light-gray;
+    
+    li {
+      list-style: none;
+      
+      &:hover, &.active {
+        color: $white;
+        background-color: $light-gray;
+      }
+    }
+    
+    .modeSwitch {
+      margin-left: auto;
+    }
+    
+    & .wbb-selectbox {
+      height: 30px;
+      max-width: 190px;
+      margin: 1px 0;
+      display: inline-block;
+      background: transparent;
+      border: 0;
+    }
+  }
+  
+  // --------------
+  // TOOLBAR BUTTON
+  // --------------
+  &-button {
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 1rem;
+    cursor: pointer;
+    position: relative;
+    
+    &:hover {
+      .btn-tooltip, .wbb-list {
+        display: block;
+      }
+    }
+    
+    &.active {
+      &, &:hover {
+        // removed .wysibb-toolbar-btn:active the "on" class seems to always be applied
+        background: $medium-gray;
+        padding: 0px 1px;
+        box-shadow: inset 0px 0px 3px $dark-gray;
+        border: 1px solid $dark-gray;
+        border-radius: 0px;
+      }
+    }
+    
+    // ---------------
+    // DISABLED BUTTON
+    // ---------------
+    &.disabled {
+      &, &:hover {
+        opacity: 0.3;
+        cursor: default;
+        overflow: hidden;
+        border: 0;
+        padding: 1px 2px;
+        background: transparent;
+      }
+    }
+    
+    // ----------
+    // SELECT BOX
+    // ----------
+    &.wbb-select {
+      display: none;
+      
+      &:hover {
+        background: $light-gray;
+      }
+      
+      &, &:hover, &.dis {
+        width: 100px;
+      }
+      
+      &.active {
+        padding: 1px 1px 1px 5px;
+        border: 1px solid $dark-gray;
+        background: $medium-gray;
+        box-shadow: inset 0px 0px 3px $dark-gray;
+      }
+      
+      .sar {
+        display: block;
+        position: absolute;
+        right: 3px;
+        top: 3px;
+        width: 10px;
+        height: 22px;
+        cursor: default;
+        text-decoration: none;
+      }
+      
+      .val {
+        height: 28px;
+        font-weight: bold;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 10px;
+      }
+      
+      .option {
+        display: block;
+        padding: 6px 10px;
+        white-space: nowrap;
+        cursor: pointer;
+        
+        &.active {
+          background: map-get($foundation-palette, primary);
+          color: $white;
+        }
+      }
+    }
+    
+    // --------
+    // DROPDOWN
+    // --------
+    &.wbb-dropdown {
+      
+      &, &:active {
+        padding-right: 10px;
+        background: transparent;
+        border: 1px solid transparent;
+        box-shadow: none;
+        position: relative;
+      } 
+      
+      &.active {
+        &, &:active {
+           border: 1px solid $dark-gray;
+           background: $medium-gray;
+           box-shadow: inset 0px 0px 3px $dark-gray;
+        }
+      }
+      
+      .ar {
+        display: block;
+        position: absolute;
+        right: 10%;
+        top: 0px;
+        width: 9px;
+        height: 24px;
+        cursor: default;
+        text-decoration: none;
+        padding: 0 2px;
+      }
+    }
+    
+    // --------
+    // SMILEBOX
+    // --------
+    &.wbb-smilebox {
+      background: transparent;
+      border: 1px solid transparent;
+      box-shadow: none;
+      
+      &.active {
+        border: 1px solid $dark-gray;
+        background: $medium-gray;
+        box-shadow: inset 0px 0px 3px $dark-gray;
+      }
+      
+      .wbb-list {
+        width: 156px;
+      }
+      
+      .smile {
+        width: 16px;
+        height: 16px;
+        padding: 5px;
+        display: inline-block;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      .smile img {
+        max-width: 16px;
+        max-height: 16px;
+      }
+    }
+    
+    .wbb-list, .button-tooltip {
+      display: none;
+    }
+    
+    .button-tooltip {
+      color: $tooltip-color;
+      background-color: $tooltip-background-color;
+      white-space: nowrap;
+      font-size: $tooltip-font-size;
+      padding: rem-calc(3) rem-calc(10);
+      height: $tooltip-pip-height;
+      width: $tooltip-pip-width;
+      position: absolute;
+      left: 0;
+      bottom: 35px;
+      z-index: 10000;
+    }
+    
+    .button-inner {
+      display: block;
+      line-height: rem-calc(28);
+      margin: 2px;
+    }
+    
+    .button-text {
+      text-transform: uppercase;
+      font-family: sans-serif,Verdana,Tahoma;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .wbb-list {
+      width: 280px;
+      padding: 0;
+      max-height: 250px;
+      
+      .sc {
+        width: 16px;
+        height: 16px;
+        margin: 0 2px 1px 1px;
+        display: inline-block;
+        cursor: pointer;
+        
+        &:hover {
+          border-color: #333;
+        }
+      }
+      
+      .nc {
+        height: 24px;
+        text-align: center;
+        color: #666;
+        margin: 0 1px 5px 1px;
+        
+        &:hover {
+          background: $light-gray;
+        }
+      }
+      
+      .pl {
+        display: block;
+        height: 5px;
+      }
+    }
+    
+    .cp-line {
+      display: block;
+      position: absolute;
+      width: 60%;
+      height: 3px;
+      background: black;
+      bottom: 3px;
+      left: 20%;
+    }
+  }
+  
+  .modesw {
+    font-weight: bold;
+    text-align: center;
+    display: block;
+    text-transform: uppercase;
+  }
+  
+  .tthotkey {
+    color: $light-gray;
+    font-size: 10px;
+  }
+  
+  // --------
+  // TEXTAREA
+  // --------
+  &-textarea, &-texarea:active {
+    border: none;
+    margin: 0;
+    outline: none;
+    padding: 0;
+    float: none;
+  }
+  
+  
+  &-text {
+    padding: 5px;
+    
+    &-editor {
+      outline: none;
+      
+      .wbbtab {
+        margin-left: 30px;
+      }
+    }
+  }
+  
+  .bottom-resize-line {
+    display: none;
+    height: 5px;
+    cursor: ns-resize;
+    &:hover, &.drag {
+      background: $light-gray;
+    }
+  }
+  
+  .tbl-sel {
+    border: 1px solid $light-gray;
+    position: absolute;
+    cursor: pointer;
+    box-sizing: border-box;
+    
+    &:hover {
+      background: $light-gray;
+    }
+  }
+  .wbb-table td {
+    border: 1px dashed $light-gray;
+    padding: 3px;
+    margin: 5px;
+    min-width: 5px;
+    min-height: 15px;
+  }
+}
+
+.wysibb-modal {
+  font: 12px/1.2 Arial,Verdana;
+  position: fixed;
+  text-align: center;
+  bottom: 0;
+  left: 0;
+  top: 0;
+  right: 0;
+  overflow: auto;
+  background: rgba(0,0,0,0.5);
+  z-index: 1100;
+  
+  button {
+    display: inline-block;
+    padding: 3px 15px;
+    
+    &:focus, &:active {
+      outline: 0;
+    }
+  }
+  
+  .wbbm {
+    background: $white;
+    text-align: left;
+    max-width: 90%;
+    max-height: 90%;
+    margin: 30px auto;
+    border: 1px solid $medium-gray;
+    box-shadow: 0px 0px 5px #333;
+    overflow: auto;
+    
+    &-title {
+      color: #333;
+      position: relative;
+      padding: 5px 10px;
+      border-bottom: 1px solid $medium-gray;
+      
+      &-text {
+        margin: 0;
+        padding: 0;
+      }
+    }
+    
+    &-tablist {
+      padding: 10px 20px;
+    }
+    
+    &-tablist ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      
+      & li {
+        padding: 10px;
+        cursor: pointer;
+        margin: 5px 0;
+        position: relative;
+        border-radius: 0px;
+        display: inline-block;
+        margin: 0 10px 5px 0;
+        
+        &:hover {
+          background: $light-gray;
+        }
+        
+        &.active {
+          &, &:hover {
+            background: map-get($foundation-palette, primary);
+            color: $white;
+            cursor: default;
+          }
+        }
+      }
+    }
+    
+    &-cont {
+      padding: 10px 20px;
+    }
+    
+    &-content {
+      min-height: 50px;
+      max-height: 100%;
+    }
+    
+    &-bottom {
+      border-top: 1px solid $medium-gray;
+      padding: 10px;
+      background: #f1f1f1;
+    }
+  }
+  
+  .wbbm {
+    &-close {
+      display: block;
+      text-transform: uppercase;
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #888;
+      
+      &:hover {
+        color: red;
+      }
+    }
+    
+    &-button {
+      background: map-get($foundation-palette, primary);
+      color: $white;
+      border: 1px solid #357ebd;
+      border-radius: 0px;
+      cursor: pointer;
+      
+      &:hover {
+        background: #3276b1;
+        border: 1px solid #285e8e;
+      }
+    }
+    
+    &-cancel-button {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid $light-gray;
+      border-radius: 0px;
+      cursor: pointer;
+      margin-left: 15px;
+      
+      &:hover {
+        background: $white;
+        border: 1px solid $medium-gray;
+      }
+    }
+    
+    &-remove-button {
+      background: #d9534f;
+      color: $white;
+      border: 1px solid #d43f3a;
+      border-radius: 0px;
+      cursor: pointer;
+      float: right;
+      
+      &:hover {
+        background: #d2322d;
+        border: 1px solid #ac2925;
+      }
+    }
+    
+    &-inp-row {
+      margin-bottom: 15px;
+      
+      & label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 3px;
+      }
+      
+      & input {
+        display: block;
+        height: 34px;
+        padding: 2px 5px;
+        line-height: 1.42857143;
+        width: 100%;
+        border: 1px solid $dark-gray;
+        outline: none;
+        box-sizing: border-box;
+        border-radius: 0;
+        
+        &.wbbm-brdred {
+          border-color: red !important;
+        }
+      }
+      
+      &-inperr {
+        color: red;
+        display: block;
+      }
+      
+    }
+  }
+  
+  .modal-text {
+    border: 1px solid $dark-gray;
+    padding: 2px 5px;
+    max-height: 100px;
+    overflow: auto;
+  }
+  
+  .imguploader {
+    text-align: center;
+
+    &.drag {
+      border: 3px dashed $medium-gray;
+      
+      &.dragover {
+        background: #feffe4;
+      }
+    }
+    
+    &.loading {
+      padding: 40px 0;
+    }
+    
+    // not used based on this example, https: //github.com/wbb/WysiBB/issues/64
+    // #wbbmodal #imguploader.drag .p {
+      // font-size: 2em;
+      // color: $dark-gray;
+      // margin-top: 15px;
+    // }
+    // .p2 {
+      // color: #AAA;
+    // }
+    
+    .fileupload {
+      margin: 40px 0;
+      position: relative;
+      
+      .file {
+        opacity: 0;
+        width: 230px;
+        height: 32px;
+        position: absolute;
+        top: 2px;
+        left: 50%;
+        margin-left: -115px;
+        display: block;
+      }
+    }
+    
+    .dragupload {
+      margin: 10px 0 15px 0;
+      position: relative;
+    }
+    
+    .loader {
+      margin: 30px 0;
+    }
+    
+    .upl-error {
+      color: red;
+      display: block;
+    }
+  }
+}
+
+
+/* CONTENT STYLES*/
+
+/* PHPBB3 */
+.content-phpbb3 {
+  font-size: 13px;
+  line-height: normal;
+  
+  .codebox {
+    dt {
+      float: none;
+      width: 100%;
+    }
+    
+    dd {
+      margin: 0 !important;
+    }
+  }
+}
+
+/* DESKTOP AND TAVBLETS STYLES */
+// @media (min-width: 992px) {
+	// /* TOOLBAR */
+	// .wysibb .wysibb-text {
+	  // padding: 5px;
+	  // margin: 0;
+	// }
+	// .wysibb .wysibb-toolbar {
+	  // float: none;
+	  // width: auto;
+	  // overflow: visible;
+	  // border-right: 0;
+	// }
+	// .wysibb .wysibb-toolbar {
+	  // border-bottom: 1px solid $light-gray;
+	  // position: relative;
+	  // padding: 0 60px 0 0;
+	  // height: auto;
+	// }
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container {
+	  // margin: 0;
+	  // border-right: 1px solid $light-gray;
+	  // padding: 0;
+	  // display: inline-block;
+	// }
+// 	
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn {
+	  // display: inline-block;
+	  // height: 32px;
+	  // min-width: 28px;
+	  // position: relative;
+	  // vertical-align: middle;
+	  // padding: 0px 1px;
+	  // cursor: pointer;
+	  // margin: 0 0 0 1px;
+	  // border: 1px solid transparent;
+	  // width: auto;
+	// }
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn:hover span.btn-tooltip {
+	  // display: block;
+	// }
+	// .wysibb .wysibb-toolbar .modeSwitch {
+	  // text-align: center;
+	  // position: absolute;
+	  // right: 0px;
+	  // top: 0px;
+	  // border: 0;
+	// }
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container select.wbb-selectbox {
+	  // display: none;
+	// }
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select {
+	  // display: inline-block;
+	// }
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select span.val,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select ins {
+	  // display: block;
+	// }
+// 	
+	// .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn .wbb-list {
+	  // display: none;
+	  // position: absolute;
+	  // top: 32px;
+	  // left: -1px;
+	  // border: 1px solid $medium-gray;
+	  // box-shadow: 0px 0px 3px $dark-gray;
+	  // width: 190px;
+	  // background: $white;
+	  // max-height: 220px;
+	  // overflow: auto;
+	  // z-index: 1000;
+	// }
+// 	
+	// .wbb-list .sc {
+	  // width: 16px;
+	  // height: 16px;
+	  // margin: 0 0 1px 1px;
+	  // display: inline-block;
+	  // cursor: pointer;
+	  // border: 1px solid $white;
+	// }
+// 	
+	// .ve-tlb-colorpick {width: 24px;
+		// height: 24px;
+		// text-align: right;
+	// }
+	// .wysibb .bottom-resize-line {display: block;
+		// height: 5px;
+		// cursor: ns-resize;
+	// }
+// }
+
+
+
+
+// Font Awesome
+@import "font-awesome";
